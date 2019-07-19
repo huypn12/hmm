@@ -2,19 +2,20 @@
 #define __MC_RANDOM_HPP__
 
 #include <random>
-#include <optional>
+#include <vector>
 
 namespace org::mcss {
 
 class mc_random {
 private:
-  
+  std::default_random_engine generator_;
+
 protected:
-  void init_seed();
+  void init(int seed);
 
 public:
-  int choose_dirichlet();
-  int choice_uniform();
+  int choose_uniform(const int &n_states);
+  int choose_dirichlet(const std::vector<double> &distribution);
 };
 
 }
