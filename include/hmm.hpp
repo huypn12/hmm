@@ -5,46 +5,58 @@
 #include "dtmc.hpp"
 
 namespace org::mcss {
-  class hmm {
-  private:
-    int hidden_states_size_;
-    Eigen::VectorXd initial_p_;
-    Eigen::MatrixXd transition_p_;
+class hmm {
+private:
+  int hidden_states_card_;
+  Eigen::MatrixXd initial_p_;
+  Eigen::MatrixXd transition_p_;
 
-    int alphabet_size_;
-    Eigen::MatrixXd emission_p_;
+  int alphabet_card_;
+  Eigen::MatrixXd emission_p_;
 
-    static const int MAX_ITERS = 10000;
+  static const int MAX_ITERS = 10000;
 
-  protected:
-    void forward();
-    void backward();
-    void pij();
+protected:
+  /*
+    Forward procedure
+    @param
+    @param
+   */
+  Eigen::MatrixXd forward(const std::vector<int> &observation);
 
-
+  /*
+    Backward procedure
+   */
+  Eigen::MatrixXd backward(const std::vector<int> &observation);
+  /*
+    Transition probability from state i to state j at time t
+    Pr[s_(t+1)=j, s_(t)=i]
+    @param i state at time t
+    @param j state at time t+1
+    @param t timestep
+   */
+  double pr_ij_t(const int &i, const int &j, const int &t); 
 
   public:
-    hmm();
+    hmm(const int &hidden_states_card, const int &alphabet_card);
 
     /*
       Likelihood estimation: forward-backward algorithm
 
      */
-    double likelihood(const std::vector<int> &observation,
-                      const std::vector<int> &hidden_trace);
+  double likelihood(const std::vector<int> &observation,
+                    const std::vector<int> &hidden_trace);
 
-    // Parameter estimation: baum-welch
-    void fit(const std::vector<int> &observation,
-             const int max_iters = MAX_ITERS);
+  // Parameter estimation: baum-welch
+  void fit(const std::vector<int> &observation,
+           const int max_iters = MAX_ITERS);
 
-    // Observation explanation: viterbi
-    std::vector<int> explain(const std::vector<int> &observation); 
+  // Observation explanation: viterbi
+  std::vector<int> explain(const std::vector<int> &observation);
 
-    // simulate an observation
-    void simulate(const int steps_count);
-
-    
-  };
+  // simulate an observation
+  std::vector<int> simulate(const int steps_count);
+};
 }
 
 #endif

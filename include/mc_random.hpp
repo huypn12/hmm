@@ -2,7 +2,7 @@
 #define __MC_RANDOM_HPP__
 
 #include <random>
-#include <vector>
+#include <eigen3/Eigen/Dense>
 
 namespace org::mcss {
 
@@ -15,7 +15,7 @@ protected:
 
 public:
   int choose_uniform(const int &n_states);
-  int choose_dirichlet(const std::vector<double> &distribution);
+  int choose_dirichlet(const Eigen::VectorXd &distribution);
 };
 
 }
