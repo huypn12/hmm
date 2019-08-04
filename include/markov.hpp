@@ -2,12 +2,12 @@
 #define __MARKOV_HPP__
 
 namespace org::mcss {
-
   class markov {
     public:
       virtual int next_state();
+      virtual int get_current_state();
+      virtual int get_previous_state();
   };
-
 } // org::mcss
 
 #endif
