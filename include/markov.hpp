@@ -4,9 +4,10 @@
 namespace org::mcss {
 
   class markov {
-  public:
-    int next_state();
+    public:
+      virtual int next_state();
   };
-}
+
+} // org::mcss
 
 #endif
