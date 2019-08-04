@@ -7,14 +7,12 @@
 namespace org::mcss {
 class hmm {
 private:
-  int hidden_states_card_;
-  Eigen::MatrixXd initial_p_;
-  Eigen::MatrixXd transition_p_;
+  dtmc hidden_states_;
 
   int alphabet_card_;
   Eigen::MatrixXd emission_p_;
 
-  static const int MAX_ITERS = 10000;
+  static const int BW_MAXITERS = 10000;
 
 protected:
   /*
@@ -49,13 +47,13 @@ protected:
 
   // Parameter estimation: baum-welch
   void fit(const std::vector<int> &observation,
-           const int max_iters = MAX_ITERS);
+           const int max_iters = BW_MAXITERS);
 
   // Observation explanation: viterbi
   std::vector<int> explain(const std::vector<int> &observation);
 
   // simulate an observation
-  std::vector<int> simulate(const int steps_count);
+  std::vector<int> next_observation();
 };
 }
 
