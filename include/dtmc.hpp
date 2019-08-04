@@ -9,20 +9,21 @@
 
 namespace org::mcss {
 
-  class dtmc: public markov {
-  private:
-    Eigen::MatrixXf trans_p_;
-    Eigen::VectorXf initial_p_;
+class dtmc : public markov {
+ private:
+  int hidden_states_size_;
+  Eigen::MatrixXd initial_p_;
+  Eigen::MatrixXd transition_p_;
 
-    int current_state_;
-    int jump();
+  int current_state_;
 
-  public:
-    dtmc();
-    dtmc(const Eigen::MatrixXf &p, const Eigen::VectorXf &p0);
+ public:
+  dtmc();
+  dtmc(const Eigen::MatrixXf &p, const Eigen::VectorXf &p0);
 
-    int next_state();
-    int current_state();
+  // stream
+  int next_state();
+  int current_state();
 };
 
 } // namespace org::mcss
