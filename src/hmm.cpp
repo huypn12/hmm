@@ -35,7 +35,12 @@ double hmm::pr_ij_t(const int &i, const int &j, const int &t)
 {
   return 0.0;
 }
-
+double hmm::likelihood(const std::vector<int> &observation, const std::vector<int> &hidden_trace) {
+  return 0;
+}
+std::vector<int> hmm::next_observation() {
+  return std::vector<int>();
+}
 
 std::vector<int> hmm::simulate(const int steps_count)
 {
