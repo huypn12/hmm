@@ -2,22 +2,30 @@
 #define __MC_RANDOM_HPP__
 
 #include <random>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Eigen>
 
 namespace org::mcss {
+  class mc_random {
+  private:
+    int seed_;
+    std::mt19937_64 generator_;
 
-class mc_random {
-private:
-  std::default_random_engine generator_;
+  protected:
+    void init(int seed);
 
-protected:
-  void init(int seed);
+  public:
+    mc_random();
+    mc_random(int seed);
 
-public:
-  int choose_uniform(const int &n_states);
-  int choose_dirichlet(const Eigen::VectorXd &distribution);
-};
+    void reset();
 
-}
+    int choose_uniform(const int &n_states);
+    int choose_dirichlet(const std::vector<double> &distribution);
+    int choose_dirichlet(const Eigen::VectorXd &distribution);
+
+    double uniform_p();
+  };
+
+} // org::mcss
 
 #endif //HMM_INCLUDE_MC_RANDOM_HPP
