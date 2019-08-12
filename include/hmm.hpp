@@ -2,39 +2,33 @@
 #define __HMM_HPP__
 
 #include "dtmc.hpp"
+#include <vector>
 
 namespace org::mcss {
 class hmm : public dtmc {
- private:
+private:
+  Eigen::MatrixXd random_matrix(const int &row, const int &col);
+  Eigen::VectorXd random_vector(const int &dim);
 
-  int alphabet_card_;
+protected:
+  int alphabet_size_;
   Eigen::MatrixXd emission_p_;
-
   static const int BW_MAXITERS = 10000;
 
- protected:
-  /*
-    Forward procedure
-    @param
-    @param
-   */
-  Eigen::MatrixXd forward(const std::vector<int> &observation);
+  Eigen::MatrixXd forward_procedure(const std::vector<int> &observation);
+  Eigen::MatrixXd backward_procedure(const std::vector<int> &observation);
+  double step(const int &i, const int &j, const int &t);
 
-  /*
-    Backward procedure
-   */
-  Eigen::MatrixXd backward(const std::vector<int> &observation);
-  /*
-    Transition probability from state i to state j at time t
-    Pr[s_(t+1)=j, s_(t)=i]
-    @param i state at time t
-    @param j state at time t+1
-    @param t timestep
-   */
-  double pr_ij_t(const int &i, const int &j, const int &t);
+public:
+  hmm(const int &states_size, const int &alphabet_size,
+      const Eigen::VectorXd &p0, const Eigen::MatrixXd &p,
+      const Eigen::MatrixXd &b);
+  hmm(const int &states_size, const int &alphabet_size);
+  void init_random();
 
- public:
-  hmm(const int &hidden_states_card, const int &alphabet_card);
+  // stream observation
+  int next_observation();
+
   // Likelihood estimation: forward-backward algorithm
   double likelihood(const std::vector<int> &observation,
                     const std::vector<int> &hidden_trace);
@@ -45,10 +39,7 @@ class hmm : public dtmc {
 
   // Observation explanation: viterbi
   std::vector<int> explain(const std::vector<int> &observation);
-
-  // simulate an observation
-  std::vector<int> next_observation();
 };
-}
+} // namespace org::mcss
 
 #endif

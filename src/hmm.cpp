@@ -3,54 +3,74 @@
 
 using namespace org::mcss;
 
+hmm::hmm(const int &states_size, const int &alphabet_size)
+    : dtmc(states_size, Eigen::VectorXd(states_size),
+           Eigen::MatrixXd(states_size, states_size)),
+      alphabet_size_(alphabet_size),
+      emission_p_(Eigen::MatrixXd(states_size, alphabet_size)) {}
 
-void populate(Eigen::MatrixXd &matrix) {
-  std::default_random_engine generator;
-  std::uniform_real_distribution<double> distribution(0.0, 1.0);
-  for (int i = 0; i < matrix.cols(); i++) {
-    for (int j = 0; j < matrix.rows(); j++) {
-      matrix(i, j) = distribution(generator);
-    }
+hmm::hmm(const int &states_size, const int &alphabet_size,
+         const Eigen::VectorXd &p0, const Eigen::MatrixXd &p,
+         const Eigen::MatrixXd &b)
+    : dtmc(states_size, p0, p), alphabet_size_(alphabet_size), emission_p_(b) {}
+
+Eigen::VectorXd hmm::random_vector(const int &dim) {
+  auto vector = Eigen::VectorXd(dim);
+  for (int i = 0; i < vector.size(); i++) {
+    vector(i) = mc_random_.uniform_p();
   }
+  return vector;
 }
 
-
-Eigen::MatrixXd random_matrix(const int &row, const int &col){
-  Eigen::MatrixXd matrix = Eigen::MatrixXd();
-  populate(matrix);
+Eigen::MatrixXd hmm::random_matrix(const int &row, const int &col) {
+  auto matrix = Eigen::MatrixXd(row, col);
+  for (int i = 0; i < matrix.cols(); i++) {
+    for (int j = 0; j < matrix.rows(); j++) {
+      matrix(i, j) = mc_random_.uniform_p();
+    }
+  }
   return matrix;
 }
 
-
-hmm::hmm(const int &hidden_states_card, const int &alphabet_card) {
-  hidden_states_card_ = hidden_states_card;
-  alphabet_card_ = alphabet_card;
-
-  initial_p_ = random_matrix(1, hidden_states_card_);
-  transition_p_ = random_matrix(hidden_states_card_, hidden_states_card_);
-  emission_p_ = random_matrix(hidden_states_card_, alphabet_card_);
+void hmm::init_random() {
+  initial_p_ = random_vector(states_size_);
+  transition_p_ = random_matrix(states_size_, states_size_);
+  emission_p_ = random_matrix(states_size_, alphabet_size_);
 }
 
-double hmm::pr_ij_t(const int &i, const int &j, const int &t)
-{
-  return 0.0;
+int hmm::next_observation() {
+  int state = next_state();
+  int observation = mc_random_.choose_dirichlet(emission_p_.col(state));
+  return observation;
 }
-double hmm::likelihood(const std::vector<int> &observation, const std::vector<int> &hidden_trace) {
+
+double hmm::likelihood(const std::vector<int> &observation,
+                       const std::vector<int> &hidden_trace) {
   return 0;
 }
-std::vector<int> hmm::next_observation() {
-  return std::vector<int>();
-}
 
-std::vector<int> hmm::simulate(const int steps_count)
+// Parameter estimation: baum-welch
+Eigen::MatrixXd forward_procedure(const std::vector<int> &observation)
 {
-  mc_random rand_engine;
-  std::vector<int> trace;
-  for (int i = 0; i < steps_count; i++) {
-    int hidden_state = rand_engine.choose_dirichlet(transition_p_.col(i));
-    int observation = rand_engine.choose_dirichlet(emission_p_.col(hidden_state));
-  }
-  return trace;
+  
 }
 
+Eigen::MatrixXd backward_procedure(const std::vector<int> &observation)
+{
+  
+}
+double step(const int &i, const int &j, const int &t)
+{
+  
+}
+void hmm::fit(const std::vector<int> &observation,
+              const int max_iters)
+{
+  
+}
 
+// Observation explanation: viterbi
+std::vector<int> explain(const std::vector<int> &observation)
+{
+  
+}
