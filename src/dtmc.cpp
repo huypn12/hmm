@@ -1,20 +1,18 @@
 #include "dtmc.hpp"
 
-
 using namespace org::mcss;
 
-dtmc::dtmc(const Eigen::MatrixXf& p, const Eigen::VectorXf& p0)
-{
-  transition_p_ = p;
-  initial_p_ = p0;
-}
+dtmc::dtmc(int states_size,
+           const Eigen::MatrixXd& p, const Eigen::VectorXd& p0)
+  : states_size_(states_size),
+    transition_p_(p),
+    initial_p_(p0)
+{}
 
 int dtmc::transition()
 {
-  auto step_p = transition_p_.row(current_state_);
-  std::vector<double> v2;
-  v2.resize(step_p.size());
-  return mc_random_.choose_dirichlet();
+  auto pij = transition_p_.row(current_state_);
+  return mc_random_.choose_dirichlet(pij);
 }
 
 int dtmc::next_state()

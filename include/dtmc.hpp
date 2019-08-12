@@ -4,34 +4,28 @@
 #include "mc_random.hpp"
 #include "markov.hpp"
 
-#include "eigen3/Eigen/Dense"
-
-#include <random>
-
 namespace org::mcss {
+  class dtmc {
+  protected:
+    mc_random mc_random_;
 
-class dtmc : public markov {
- protected:
-  int current_state_;
-  int previous_state_;
+    int current_state_;
+    int previous_state_;
+    int states_size_;
+    Eigen::VectorXd initial_p_;
+    Eigen::MatrixXd transition_p_;
 
-  mc_random mc_random_;
+    int transition();
 
-  int hidden_states_size_;
-  Eigen::MatrixXd initial_p_;
-  Eigen::MatrixXd transition_p_;
+   public:
+    dtmc(int state_size, const Eigen::MatrixXd &p, const Eigen::VectorXd &p0);
 
-  int transition();
+    // markov trace stream
+    int next_state();
+    int get_current_state();
+    int get_previous_state();
+  };
 
- public:
-  dtmc();
-  dtmc(const Eigen::MatrixXf &p, const Eigen::VectorXf &p0);
-
-  // markov stream
-  int next_state();
-  int get_current_state();
-  int get_previous_state();
-};
 } // namespace org::mcss
 
 #endif
