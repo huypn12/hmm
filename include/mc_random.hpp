@@ -1,31 +1,34 @@
 #ifndef __MC_RANDOM_HPP__
 #define __MC_RANDOM_HPP__
 
-#include <random>
 #include <Eigen/Eigen>
+#include <random>
 
 namespace org::mcss {
-  class mc_random {
-  private:
-    int seed_;
-    std::mt19937_64 generator_;
+class mc_random {
+private:
+  int seed_;
+  std::mt19937_64 generator_;
 
-  protected:
-    void init(int seed);
+protected:
+  void init(int seed);
 
-  public:
-    mc_random();
-    mc_random(int seed);
+public:
+  mc_random();
+  mc_random(int seed);
 
-    void reset();
+  void reset();
 
-    int choose_uniform(const int &n_states);
-    int choose_dirichlet(const std::vector<double> &distribution);
-    int choose_dirichlet(const Eigen::VectorXd &distribution);
+  int choose_uniform(const int &n_states);
+  int choose_dirichlet(const std::vector<double> &distribution);
+  int choose_dirichlet(const Eigen::VectorXd &distribution);
 
-    double uniform_p();
-  };
+  double uniform_p();
 
-} // org::mcss
+  Eigen::MatrixXd random_matrix(const int &row, const int &col);
+  Eigen::VectorXd random_vector(const int &dim);
+};
 
-#endif //HMM_INCLUDE_MC_RANDOM_HPP
+} // namespace org::mcss
+
+#endif // HMM_INCLUDE_MC_RANDOM_HPP

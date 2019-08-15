@@ -7,13 +7,13 @@
 namespace org::mcss {
 class hmm : public dtmc {
 private:
-  Eigen::MatrixXd random_matrix(const int &row, const int &col);
-  Eigen::VectorXd random_vector(const int &dim);
-
 protected:
   int alphabet_size_;
   Eigen::MatrixXd emission_p_;
   static const int BW_MAXITERS = 10000;
+
+  double log_likelihood_;
+  double aic_;
 
   Eigen::MatrixXd forward_procedure(const std::vector<int> &observation);
   Eigen::MatrixXd backward_procedure(const std::vector<int> &observation);
@@ -28,6 +28,9 @@ public:
 
   // stream observation
   int next_observation();
+
+  // info
+  void show_model_info();
 
   // Likelihood estimation: forward-backward algorithm
   double likelihood(const std::vector<int> &observation,

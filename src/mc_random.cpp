@@ -48,3 +48,20 @@ double mc_random::uniform_p()
   std::uniform_real_distribution<double> distribution(0.0, 1.0);
   return distribution(generator_);
 }
+Eigen::VectorXd mc_random::random_vector(const int &dim) {
+  auto vector = Eigen::VectorXd(dim);
+  for (int i = 0; i < vector.size(); i++) {
+    vector(i) = uniform_p();
+  }
+  return vector;
+}
+
+Eigen::MatrixXd mc_random::random_matrix(const int &row, const int &col) {
+  auto matrix = Eigen::MatrixXd(row, col);
+  for (int i = 0; i < matrix.cols(); i++) {
+    for (int j = 0; j < matrix.rows(); j++) {
+      matrix(i, j) = uniform_p();
+    }
+  }
+  return matrix;
+}
