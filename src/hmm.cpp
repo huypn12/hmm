@@ -22,26 +22,23 @@ void hmm::init_random() {
   emission_p_ = mc_random_.random_matrix(states_size_, alphabet_size_);
 }
 
+// SIMULATE
 int hmm::next_observation() {
   int state = next_state();
   int observation = mc_random_.choose_dirichlet(emission_p_.col(state));
   return observation;
 }
 
-double hmm::likelihood(const std::vector<int> &observation,
-                       const std::vector<int> &hidden_trace) {
-  return 0;
-}
-
-// Parameter estimation: baum-welch
+// INFERENCE
+// Question 1
 Eigen::MatrixXd hmm::forward_procedure(const std::vector<int> &observation) {
   auto observation_len = observation.size();
   auto alpha = Eigen::MatrixXd(states_size_, observation_len);
-  for (int i = 0; i < states_size_; i++){
-    alpha(0, i) = initial_p_(i) * emission_p_(i, observation[0]);
-  }
+  //for (int i = 0; i < states_size_; i++) {
+  //  alpha(0, i) = initial_p_(i) * emission_p_(i, observation[0]);
+  //}
+  alpha.col(0) = initial_p_ * emission_p_.col(observation[0]);
   for (int i = 0; i < observation_len; i++) {
-    
   }
   return alpha;
 }
@@ -50,14 +47,21 @@ Eigen::MatrixXd hmm::backward_procedure(const std::vector<int> &observation) {
   auto observation_len = observation.size();
   auto beta = Eigen::MatrixXd();
   for (int i = 0; i < observation_len; i++) {
-    
   }
   return beta;
 }
 
+double hmm::likelihood(const std::vector<int> &observation,
+                       const std::vector<int> &hidden_trace) {
+  return 0;
+}
+
+// Parameter estimation: baum-welch
+
 double hmm::p(const int &t, const int &i, const int &j) { return 0.0; }
 
-void expectation() {}
+void expectation() {
+}
 
 void maximization() {
   
