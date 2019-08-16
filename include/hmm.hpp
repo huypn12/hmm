@@ -18,6 +18,11 @@ protected:
   Eigen::MatrixXd forward_procedure(const std::vector<int> &observation);
   Eigen::MatrixXd backward_procedure(const std::vector<int> &observation);
   double step(const int &i, const int &j, const int &t);
+  void expetation(Eigen::MatrixXd &gamma, Eigen::MatrixXd &p);
+  void maximization(const Eigen::MatrixXd &gamma, const Eigen::MatrixXd &p,
+                    Eigen::VectorXd &new_initial,
+                    Eigen::MatrixXd &new_transition,
+                    Eigen::MatrixXd &new_emission);
 
 public:
   hmm(const int &states_size, const int &alphabet_size,
