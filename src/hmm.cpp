@@ -15,7 +15,6 @@ hmm::hmm(const int &states_size, const int &alphabet_size,
          const Eigen::MatrixXd &b)
     : dtmc(states_size, p0, p), alphabet_size_(alphabet_size), emission_p_(b) {}
 
-
 void hmm::init_random() {
   initial_p_ = mc_random_.random_vector(states_size_);
   transition_p_ = mc_random_.random_matrix(states_size_, states_size_);
@@ -34,12 +33,13 @@ int hmm::next_observation() {
 Eigen::MatrixXd hmm::forward_procedure(const std::vector<int> &observation) {
   auto observation_len = observation.size();
   auto alpha = Eigen::MatrixXd(states_size_, observation_len);
-  //for (int i = 0; i < states_size_; i++) {
-  //  alpha(0, i) = initial_p_(i) * emission_p_(i, observation[0]);
-  //}
+  // anchor step
   alpha.col(0) = initial_p_ * emission_p_.col(observation[0]);
-  for (int i = 0; i < observation_len; i++) {
+  // inductive step
+  for (int t = 1; t < observation_len; t++) {
+    alpha.col(t) = emission_p_.col(observation[t]);
   }
+
   return alpha;
 }
 
@@ -51,20 +51,21 @@ Eigen::MatrixXd hmm::backward_procedure(const std::vector<int> &observation) {
   return beta;
 }
 
-double hmm::likelihood(const std::vector<int> &observation,
-                       const std::vector<int> &hidden_trace) {
-  return 0;
+Eigen::MatrixXd hmm::smooth(const std::vector<int> &observation) {
+  return Eigen::MatrixXd();
 }
 
 // Parameter estimation: baum-welch
 
-double hmm::p(const int &t, const int &i, const int &j) { return 0.0; }
+double hmm::step(const int &t, const int &i, const int &j) { return 0.0; }
 
-void expectation() {
+void hmm::expectation(Eigen::MatrixXd &gamma, Eigen::MatrixXd &p) {
+  
 }
 
-void maximization() {
-  
+void hmm::maximization(const Eigen::MatrixXd &gamma, const Eigen::MatrixXd &p,
+                  Eigen::VectorXd &new_initial, Eigen::MatrixXd &new_transition,
+                  Eigen::MatrixXd &new_emission) {
 }
 
 void hmm::fit(const std::vector<int> &observation, const int max_iters) {
@@ -76,12 +77,10 @@ void hmm::fit(const std::vector<int> &observation, const int max_iters) {
   for (int i = 0; i < max_iters; i++) {
     Eigen::MatrixXd gamma_sum(states_size_, observation_len);
     Eigen::MatrixXd p_sum(states_size_, states_size_);
-
-    expetation(gamma_sum, p_sum);
+    expectation(gamma_sum, p_sum);
     maximization(gamma_sum, p_sum,
                  new_initial_p, new_transition_p, new_emission_p);
   }
-
   initial_p_ = new_initial_p;
   transition_p_ = new_transition_p;
   emission_p_ = new_emission_p;

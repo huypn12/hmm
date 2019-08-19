@@ -1,24 +1,33 @@
 cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 17)
 
-project(libhmm)
+project(hmm)
 
 # Dependencies check
-find_package(Eigen3 REQUIRED NO_MODULE)
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+include_directories(external/eigen)
+include_directories(external/catch2/single_include)
 
-# Build
+# Build static lib
 include_directories(include)
-file(GLOB SOURCES "src/*.cpp")
-add_library(libhmm ${SOURCES})
-target_link_libraries(libhmm Eigen3::Eigen)
+set(SOURCES
+  src/mc_random.cpp
+  src/dtmc.cpp
+  src/hmm.cpp
+)
+add_library(hmm ${SOURCES})
 
-# Test
+ENABLE_TESTING()
+
+# Test some random behaviour
 add_executable(test_mc_random test/test_mc_random.cpp)
-target_link_libraries(test_mc_random libhmm Boost::unit_test_framework)
+target_link_libraries(test_mc_random hmm)
+
+# Test dtmc with simple trace
 add_executable(test_dtmc test/test_dtmc.cpp)
-target_link_libraries(test_dtmc libhmm Boost::unit_test_framework)
+target_link_libraries(test_dtmc hmm)
+
+# Test Forward-Backward algo
 add_executable(test_hmm test/test_hmm.cpp)
-target_link_libraries(test_dtmc libhmm Boost::unit_test_framework)
+target_link_libraries(test_hmm hmm)
 
-
+add_test(libhmm test_mc_random test_dtmc test_hmm)
