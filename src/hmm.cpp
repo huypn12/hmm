@@ -21,44 +21,74 @@ void hmm::init_random() {
   emission_p_ = mc_random_.random_matrix(states_size_, alphabet_size_);
 }
 
+std::string hmm::model_info() {
+  std::stringstream ss;
+  ss << "* Model parameters: " << std::endl;
+  ss << "Hidden states cardinality: " << states_size_ << std::endl;
+  ss << "Observation cardinality: " << alphabet_size_ << std::endl;
+
+  ss << "Initial distribution: \n" << initial_p_ << std::endl;
+  ss << "Transition probabilities: \n" << transition_p_ << std::endl;
+  ss << "Emission probabilities: \n" << emission_p_ << std::endl;
+
+  ss << "* Model inferences: " << std::endl;
+  ss << "Log likelihood: " << log_likelihood_ << std::endl;
+  ss << "AIC: " << aic_ << std::endl;
+
+  return ss.str();
+}
+
 // SIMULATE
 int hmm::next_observation() {
   int state = next_state();
-  int observation = mc_random_.choose_dirichlet(emission_p_.col(state));
+  int observation = mc_random_.choose_dirichlet(emission_p_.row(state));
   return observation;
 }
 
 // INFERENCE
 // Question 1
-Eigen::MatrixXd hmm::forward_procedure(const std::vector<int> &observation) {
-  auto observation_len = observation.size();
-  auto alpha = Eigen::MatrixXd(states_size_, observation_len);
-  // anchor step
-  alpha.col(0) = initial_p_ * emission_p_.col(observation[0]);
+Eigen::MatrixXd hmm::forward(const std::vector<int> &observation) {
+  auto T = observation.size();
+  auto alpha = Eigen::MatrixXd(states_size_, T);
+  // basis step
+  alpha.col(0) = initial_p_ * transition_p_ * emission_p_.col(observation[0]);
   // inductive step
-  for (int t = 1; t < observation_len; t++) {
-    alpha.col(t) = emission_p_.col(observation[t]);
+  for (int t = 1; t < T; t++) {
+    auto O_t = emission_p_.col(observation[t]).asDiagonal().toDenseMatrix();
+    auto alpha_t = alpha.col(t - 1) * transition_p_ * O_t;
+    auto c_t = alpha_t.sum();
+    alpha.col(t) = (1 / c_t) * alpha_t;
   }
-
   return alpha;
 }
 
-Eigen::MatrixXd hmm::backward_procedure(const std::vector<int> &observation) {
-  auto observation_len = observation.size();
+Eigen::MatrixXd hmm::backward(const std::vector<int> &observation) {
+  auto T = observation.size();
   auto beta = Eigen::MatrixXd();
-  for (int i = 0; i < observation_len; i++) {
+  // basis step
+  beta.col(T - 1).setOnes().normalize();
+  // inductive step
+  for (int t = T - 2; t >= 0; t--) {
+    auto O_t = emission_p_.col(observation[t]).asDiagonal().toDenseMatrix();
+    auto beta_t = transition_p_ * O_t * beta.col(t + 1);
+    auto c_t = beta_t.sum();
+    beta.col(t) = (1 / c_t) * beta_t;
   }
-  return beta;
+    return beta;
 }
 
-Eigen::MatrixXd hmm::smooth(const std::vector<int> &observation) {
-  return Eigen::MatrixXd();
+Eigen::MatrixXd hmm::posterior(const std::vector<int> &observation) {
+  auto T = observation.size();
+  auto gamma = Eigen::MatrixXd(states_size_, T);
+  auto alpha = forward(observation);
+  auto beta = backward(observation);
+  for (int t = 0; t < T; t++) {
+    gamma.col(t) = alpha.col(t) * beta.col(t);
+  }
+  return gamma;
 }
 
 // Parameter estimation: baum-welch
-
-double hmm::step(const int &t, const int &i, const int &j) { return 0.0; }
-
 void hmm::expectation(Eigen::MatrixXd &gamma, Eigen::MatrixXd &p) {
   
 }
@@ -69,13 +99,13 @@ void hmm::maximization(const Eigen::MatrixXd &gamma, const Eigen::MatrixXd &p,
 }
 
 void hmm::fit(const std::vector<int> &observation, const int max_iters) {
-  auto observation_len = observation.size();
+  auto T = observation.size();
 
   Eigen::VectorXd new_initial_p(states_size_);
   Eigen::MatrixXd new_transition_p(states_size_, states_size_);
   Eigen::MatrixXd new_emission_p(states_size_, alphabet_size_);
   for (int i = 0; i < max_iters; i++) {
-    Eigen::MatrixXd gamma_sum(states_size_, observation_len);
+    Eigen::MatrixXd gamma_sum(states_size_, T);
     Eigen::MatrixXd p_sum(states_size_, states_size_);
     expectation(gamma_sum, p_sum);
     maximization(gamma_sum, p_sum,
@@ -87,7 +117,7 @@ void hmm::fit(const std::vector<int> &observation, const int max_iters) {
 }
 
 // Observation explanation: viterbi
-std::vector<int> explain(const std::vector<int> &observation) {
+std::vector<int> decode(const std::vector<int> &observation) {
   //TODO: implement viterbi algorithm
   return observation;
 }

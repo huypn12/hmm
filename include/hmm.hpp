@@ -2,7 +2,9 @@
 #define __HMM_HPP__
 
 #include "dtmc.hpp"
+
 #include <vector>
+#include <string>
 
 namespace org::mcss {
 class hmm : public dtmc {
@@ -12,12 +14,11 @@ protected:
   Eigen::MatrixXd emission_p_;
   static const int BW_MAXITERS = 10000;
 
-  double log_likelihood_;
-  double aic_;
+  double log_likelihood_ = 0;
+  double aic_ = 0;
 
-  Eigen::MatrixXd forward_procedure(const std::vector<int> &observation);
-  Eigen::MatrixXd backward_procedure(const std::vector<int> &observation);
-  double step(const int &i, const int &j, const int &t);
+  Eigen::MatrixXd forward(const std::vector<int> &observation);
+  Eigen::MatrixXd backward(const std::vector<int> &observation);
   void expectation(Eigen::MatrixXd &gamma, Eigen::MatrixXd &p);
   void maximization(const Eigen::MatrixXd &gamma, const Eigen::MatrixXd &p,
                     Eigen::VectorXd &new_initial,
@@ -35,17 +36,17 @@ public:
   int next_observation();
 
   // info
-  void show_model_info();
+  std::string model_info();
 
   // Likelihood estimation: forward-backward algorithm
-  Eigen::MatrixXd smooth(const std::vector<int> &observation);
+  Eigen::MatrixXd posterior(const std::vector<int> &observation);
 
   // Parameter estimation: baum-welch
   void fit(const std::vector<int> &observation,
            const int max_iters = BW_MAXITERS);
 
   // Observation explanation: viterbi
-  std::vector<int> explain(const std::vector<int> &observation);
+  std::vector<int> decode(const std::vector<int> &observation);
 };
 } // namespace org::mcss
 
