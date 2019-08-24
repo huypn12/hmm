@@ -17,8 +17,6 @@ protected:
   double log_likelihood_ = 0;
   double aic_ = 0;
 
-  Eigen::MatrixXd forward(const std::vector<int> &observation);
-  Eigen::MatrixXd backward(const std::vector<int> &observation);
   void expectation(Eigen::MatrixXd &gamma, Eigen::MatrixXd &p);
   void maximization(const Eigen::MatrixXd &gamma, const Eigen::MatrixXd &p,
                     Eigen::VectorXd &new_initial,
@@ -39,6 +37,8 @@ public:
   std::string model_info();
 
   // Likelihood estimation: forward-backward algorithm
+  Eigen::MatrixXd forward(const std::vector<int> &observation);
+  Eigen::MatrixXd backward(const std::vector<int> &observation);
   Eigen::MatrixXd posterior(const std::vector<int> &observation);
 
   // Parameter estimation: baum-welch

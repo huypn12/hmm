@@ -57,8 +57,6 @@ Eigen::MatrixXd hmm::forward(const std::vector<int> &observation) {
   for (int t = 1; t < T; t++) {
     auto O_t = emission_p_.col(observation[t]).asDiagonal().toDenseMatrix();
     auto alpha_t = alpha.col(t - 1).transpose() * transition_p_ * O_t;
-    auto c_t = alpha_t.sum();
-    alpha.col(t) = (1 / c_t) * alpha_t;
   }
   return alpha;
 }
@@ -68,13 +66,11 @@ Eigen::MatrixXd hmm::backward(const std::vector<int> &observation) {
   auto beta = Eigen::MatrixXd(states_size_, T);
   // basis step
   beta.col(T - 1).setOnes();
-  beta.col(T - 1) = beta.col(T - 1) / beta.col(T - 1).sum();
   // inductive step
   for (int t = T - 2; t >= 0; t--) {
     auto O_t = emission_p_.col(observation[t]).asDiagonal().toDenseMatrix();
     auto beta_t = transition_p_ * O_t * beta.col(t + 1);
-    auto c_t = beta_t.sum();
-    beta.col(t) = (1 / c_t) * beta_t;
+    beta.col(t) = beta_t;
   }
     return beta;
 }
