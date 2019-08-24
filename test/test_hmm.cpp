@@ -48,7 +48,12 @@ TEST_CASE_METHOD(fwd_bwd_fixture, "Test Forward Backward", "[smooth]") {
   expected << 0.007518, 0.028120319999999997, 0.01,
     0.01, 0.2109527048413057, 0.7890472951586943,
     0,0,0;
+  auto alpha = hmm_->forward(observation);
+  INFO(alpha);
+  auto beta = hmm_->backward(observation);
+  INFO(beta);
   auto posterior_marginals = hmm_->posterior(observation);
+  INFO(posterior_marginals);
   REQUIRE(posterior_marginals.isApprox(expected));
 }
 
