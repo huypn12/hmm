@@ -51,8 +51,7 @@ Eigen::MatrixXd hmm::forward(const std::vector<int> &observation) {
   auto T = observation.size();
   auto alpha = Eigen::MatrixXd(states_size_, T + 1);
   // basis step
-  //auto o_0 = emission_p_.col(observation[0]).asDiagonal().toDenseMatrix();
-  alpha.col(0) = initial_p_;//.transpose() * transition_p_ * o_0;
+  alpha.col(0) = initial_p_;
   // inductive step
   for (int t = 1; t <= T; t++) {
     auto O_t = emission_p_.col(observation[t - 1]).asDiagonal().toDenseMatrix();
@@ -66,7 +65,7 @@ Eigen::MatrixXd hmm::backward(const std::vector<int> &observation) {
   auto T = observation.size();
   auto beta = Eigen::MatrixXd(states_size_, T + 1);
   // basis step
-  beta.col(T).setOnes();
+  beta.col(T) = Eigen::VectorXd(states_size_).setOnes() / states_size_ ;
   // inductive step
   for (int t = T - 1; t >= 0; t--) {
     auto O_t = emission_p_.col(observation[t]).asDiagonal().toDenseMatrix();
@@ -90,8 +89,10 @@ Eigen::MatrixXd hmm::posterior(const std::vector<int> &observation) {
 
 // Parameter estimation: baum-welch
 void hmm::expectation(const std::vector<int> &observation,
-                      Eigen::MatrixXd &gamma, Eigen::MatrixXd &p) {
+                      Eigen::MatrixXd &gamma, Eigen::MatrixXd &xi) {
   gamma = posterior(observation);
+
+
 }
 
 void hmm::maximization(const Eigen::MatrixXd &gamma, const Eigen::MatrixXd &p,
