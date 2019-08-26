@@ -13,16 +13,16 @@ protected:
 
 public:
   fwd_bwd_fixture(){
-    int n_state = 3;
-    int n_alphabet = 3;
+    int n_state = 2;
+    int n_alphabet = 2;
 
     auto init = Eigen::VectorXd(n_state);
     auto trans = Eigen::MatrixXd(n_state, n_state);
     auto emit = Eigen::MatrixXd(n_state, n_alphabet);
 
-    init << 0.6, 0.4, 0;
-    trans << 0.69, 0.3, 0.01, 0.4, 0.59, 0.01, 0, 0, 1.0;
-    emit << 0.5, 0.4, 0.1, 0.1, 0.3, 0.6, 1.0, 0.0, 0.0;
+    init << 0.5, 0.5;
+    trans << 0.7, 0.3, 0.3, 0.7;
+    emit << 0.9, 0.1, 0.2, 0.8;
 
    hmm_ = std::make_unique<org::mcss::hmm>(n_state, n_alphabet, init,
                                             trans, emit);
@@ -43,18 +43,22 @@ TEST_CASE_METHOD(fwd_bwd_fixture, "Test info", "[non-assert]") {
 }
 
 TEST_CASE_METHOD(fwd_bwd_fixture, "Test Forward Backward", "[smooth]") {
-  std::vector<int> observation({0, 1, 2});
-  Eigen::MatrixXd expected(3, 3);
-  expected << 0.007518, 0.028120319999999997, 0.01,
-    0.01, 0.2109527048413057, 0.7890472951586943,
-    0,0,0;
+  std::vector<int> observation({0, 0, 1, 0, 0});
+  Eigen::MatrixXd expected(2, 6);
+  expected << 0.6469, 0.8673, 0.8204, 0.3075, 0.8204, 0.8673,
+      0.3531, 0.1327, 0.1796, 0.6925, 0.1796, 0.1327;
+
+  std::stringstream ss;
   auto alpha = hmm_->forward(observation);
-  INFO(alpha);
+  ss << "Forward: \n" << alpha << std::endl;
   auto beta = hmm_->backward(observation);
-  INFO(beta);
+  ss << "Backward: \n" << beta << std::endl;
   auto posterior_marginals = hmm_->posterior(observation);
-  INFO(posterior_marginals);
-  REQUIRE(posterior_marginals.isApprox(expected));
+  ss << "Actual Posterior: \n" << posterior_marginals << std::endl;
+  ss << "Expected Posterior: \n" << expected << std::endl;
+
+  INFO(ss.str());
+  REQUIRE(posterior_marginals.isApprox(expected, 0.0001));
 }
 
 class baum_welch_fixture {
