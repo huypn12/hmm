@@ -128,7 +128,7 @@ double hmm::maximization(const std::vector<int> &observation,
   Eigen::VectorXd new_initial = gamma.col(0);
   Eigen::MatrixXd new_transition =
       sigma_xi.array().colwise() *
-      gamma.block(0, 0, gamma.rows(), gamma.cols() - 1).colwise().sum().transpose().array();
+      gamma.block(0, 0, gamma.rows(), gamma.cols() - 1).rowwise().sum().array();
   Eigen::MatrixXd new_emission = Eigen::MatrixXd(states_size_, alphabet_size_);
   for (int t = 0; t < observation.size(); t++) {
     auto o = observation[t];
