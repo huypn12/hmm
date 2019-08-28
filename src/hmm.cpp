@@ -1,6 +1,8 @@
 #include "hmm.hpp"
 #include "mc_random.hpp"
 
+#include <iostream>
+
 using namespace org::mcss;
 
 hmm::hmm(const int &states_size, const int &alphabet_size)
@@ -87,20 +89,62 @@ Eigen::MatrixXd hmm::posterior(const std::vector<int> &observation) {
   return gamma;
 }
 
-// Parameter estimation: baum-welch
-void hmm::expectation(const std::vector<int> &observation,
-                      Eigen::MatrixXd &gamma, Eigen::MatrixXd &xi) {
-  gamma = posterior(observation);
-
-
+Eigen::MatrixXd hmm::posterior(const std::vector<int> &observation,
+                               const Eigen::MatrixXd &alpha,
+                               const Eigen::MatrixXd &beta) {
+  auto T = observation.size();
+  auto gamma = Eigen::MatrixXd(states_size_, T + 1);
+  for (int t = 0; t <= T; t++) {
+    gamma.col(t) = alpha.col(t).cwiseProduct(beta.col(t));
+    gamma.col(t) = gamma.col(t) / gamma.col(t).sum();
+  }
+  return gamma;
 }
 
-void hmm::maximization(const Eigen::MatrixXd &gamma, const Eigen::MatrixXd &p,
-                       Eigen::VectorXd &new_initial,
-                       Eigen::MatrixXd &new_transition,
-                       Eigen::MatrixXd &new_emission) {}
+void hmm::expectation(const std::vector<int> &observation,
+                      Eigen::MatrixXd &gamma,
+                      Eigen::MatrixXd &sigma_xi) {
+  auto T = observation.size();
+  auto alpha = forward(observation);
+  auto beta = backward(observation);
+  gamma = posterior(observation, alpha, beta);
+  sigma_xi = Eigen::MatrixXd(states_size_, states_size_);
+  for (int t = 0; t < T; t++) {
+    auto xi = Eigen::MatrixXd(states_size_, states_size_);
+    auto transit_alpha = transition_p_.array().colwise() * alpha.col(t).array();
+    auto emit_beta = emission_p_.col(observation[t+1]).cwiseProduct(beta.col(t + 1));
+    xi = transit_alpha.array().rowwise() * emit_beta.transpose().array();
+    xi = xi / xi.sum();
+    sigma_xi += xi;
+  }
+}
 
-void hmm::fit(const std::vector<int> &observation, const int max_iters) {
+double hmm::maximization(const std::vector<int> &observation,
+                       const Eigen::MatrixXd &gamma,
+                       const Eigen::MatrixXd &sigma_xi,
+                       Eigen::VectorXd &initial,
+                       Eigen::MatrixXd &transition,
+                       Eigen::MatrixXd &emission) {
+  Eigen::VectorXd new_initial = gamma.col(0);
+  Eigen::MatrixXd new_transition =
+      sigma_xi.array().colwise() *
+      gamma.block(0, 0, gamma.rows(), gamma.cols() - 1).colwise().sum().transpose().array();
+  Eigen::MatrixXd new_emission = Eigen::MatrixXd(states_size_, alphabet_size_);
+  for (int t = 0; t < observation.size(); t++) {
+    auto o = observation[t];
+    new_emission.col(o) += gamma.col(t);
+  }
+  new_emission = new_emission.array().colwise() / gamma.rowwise().sum().array();
+  // relative difference
+  auto norm_diff = 0.0;
+  norm_diff += (new_initial - initial).norm();
+  norm_diff += (new_transition - transition).norm();
+  norm_diff += (new_emission - emission).norm();
+
+  return norm_diff;
+}
+
+void hmm::fit(const std::vector<int> &observation, const int max_iters, const double eps) {
   auto T = observation.size();
 
   Eigen::VectorXd new_initial_p(states_size_);
@@ -112,9 +156,15 @@ void hmm::fit(const std::vector<int> &observation, const int max_iters) {
     Eigen::MatrixXd gamma_sum(states_size_, T);
     Eigen::MatrixXd p_sum(states_size_, states_size_);
     expectation(observation, gamma_sum, p_sum);
-    maximization(gamma_sum, p_sum,
+    auto diff = maximization(observation, gamma_sum, p_sum,
                  new_initial_p, new_transition_p, new_emission_p);
+    // stopping criteria
+    if (diff <= eps) {
+      break;
+    }
   }
+
+
   initial_p_ = new_initial_p;
   transition_p_ = new_transition_p;
   emission_p_ = new_emission_p;
