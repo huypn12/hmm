@@ -1,8 +1,7 @@
 #ifndef __MC_RANDOM_HPP__
 #define __MC_RANDOM_HPP__
 
-#include <Eigen/Eigen>
-#include <random>
+#include "pchheader.hpp"
 
 namespace org::mcss {
 class mc_random {
