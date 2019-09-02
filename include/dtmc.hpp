@@ -1,6 +1,7 @@
 #ifndef __DTMC_HPP__
 #define __DTMC_HPP__
 
+#include "pchheader.hpp"
 #include "mc_random.hpp"
 #include "markov.hpp"
 
@@ -19,6 +20,7 @@ protected:
 
 public:
   dtmc(int state_size, const Eigen::VectorXd &p0, const Eigen::MatrixXd &p);
+  std::string model_info();
 
   // markov trace stream
   int next_state();

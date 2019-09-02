@@ -19,3 +19,15 @@ int dtmc::next_state() {
   current_state_ = next_state;
   return current_state_;
 }
+
+std::string dtmc::model_info() {
+  std::stringstream ss;
+
+  ss << "Initial distribution: "
+     << initial_p_
+     << "Transition matrix: \n"
+     << transition_p_
+     << std::endl;
+
+  return ss.str();
+}
