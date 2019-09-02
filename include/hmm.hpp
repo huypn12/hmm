@@ -3,9 +3,6 @@
 
 #include "dtmc.hpp"
 
-#include <string>
-#include <vector>
-
 namespace org::mcss {
 class hmm : protected dtmc {
 private:
@@ -32,6 +29,11 @@ public:
       const Eigen::MatrixXd &b);
   hmm(const int &states_size, const int &alphabet_size);
   void init_random();
+
+  // getter
+  const Eigen::VectorXd &initial_p();
+  const Eigen::MatrixXd &transition_p();
+  const Eigen::MatrixXd &emission_p();
 
   // stream observation
   int next_observation();

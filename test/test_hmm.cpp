@@ -28,7 +28,7 @@ TEST_CASE("Simple trace simulation", "") {
   REQUIRE(ss.str().compare("0101010101") == 0);
 }
 
-TEST_CASE("Posterior marginals", "") {
+TEST_CASE("Posterior marginals, Forward-Backward", "") {
   int n_state = 2;
   int n_alphabet = 2;
 
@@ -98,7 +98,7 @@ TEST_CASE("Posterior marginals", "") {
   }
 }
 
-TEST_CASE("Parameter estimation", "") {
+TEST_CASE("Parameter estimation, Baum-Welch", "") {
   int n_state = 2;
   int n_alphabet = 2;
 
@@ -118,9 +118,15 @@ TEST_CASE("Parameter estimation", "") {
 
   std::vector<int> observation({0, 0, 1, 0, 0});
 
-  hmm->fit(observation, 100);
+  hmm->fit(observation, 1, 1e-6 );
 
   new_init << 0.2, 0.8;
   new_trans << 0.5, 0.5, 0.3, 0.7 ;
   new_emit << 0.3, 0.7, 0.8, 0.2;;
+
+  INFO(hmm->model_info());
+
+  REQUIRE(hmm->initial_p().isApprox(new_init, 0.0001));
+  REQUIRE(hmm->transition_p().isApprox(new_trans, 0.0001));
+  REQUIRE(hmm->emission_p().isApprox(new_emit, 0.0001));
 }
