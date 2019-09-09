@@ -2,8 +2,18 @@
 
 using namespace org::mcss;
 
-dtmc::dtmc(int states_size, const Eigen::VectorXd &p0, const Eigen::MatrixXd &p)
-    : states_size_(states_size), transition_p_(p), initial_p_(p0) {}
+dtmc::dtmc(int state_count, const Eigen::VectorXd &initial_p,
+           const Eigen::MatrixXd &transition_p)
+    : state_count_(state_count), initial_p_{}, transition_p_{} {
+  initial_p_ = initial_p;
+  transition_p_ = transition_p;
+}
+
+dtmc::dtmc(int state_count)
+    : state_count_(state_count), initial_p_{}, transition_p_{} {
+  initial_p_ = Eigen::VectorXd::Zero(state_count);
+  transition_p_ = Eigen::MatrixXd::Zero(state_count, state_count);
+}
 
 int dtmc::transition() {
   if (current_state_ == -1) {
@@ -23,11 +33,10 @@ int dtmc::next_state() {
 std::string dtmc::model_info() {
   std::stringstream ss;
 
-  ss << "Initial distribution: "
-     << initial_p_
+  ss << "Initial distribution: \n"
+     << initial_p_ << std::endl
      << "Transition matrix: \n"
-     << transition_p_
-     << std::endl;
+     << transition_p_ << std::endl;
 
   return ss.str();
 }

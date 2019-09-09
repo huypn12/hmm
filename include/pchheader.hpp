@@ -6,6 +6,7 @@
 #include <random>
 #include <memory>
 #include <functional>
+#include <iostream>
 
 #include <Eigen/Eigen>
 

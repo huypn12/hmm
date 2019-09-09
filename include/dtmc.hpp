@@ -1,9 +1,9 @@
 #ifndef __DTMC_HPP__
 #define __DTMC_HPP__
 
-#include "pchheader.hpp"
-#include "mc_random.hpp"
 #include "markov.hpp"
+#include "mc_random.hpp"
+#include "pchheader.hpp"
 
 namespace org::mcss {
 class dtmc {
@@ -12,15 +12,20 @@ protected:
 
   int current_state_ = -1;
   int previous_state_ = -1;
-  int states_size_;
+  int state_count_;
   Eigen::VectorXd initial_p_;
   Eigen::MatrixXd transition_p_;
 
   int transition();
 
 public:
-  dtmc(int state_size, const Eigen::VectorXd &p0, const Eigen::MatrixXd &p);
+  dtmc(int state_count);
+  dtmc(int state_count, const Eigen::VectorXd &initial_p,
+       const Eigen::MatrixXd &transition_p);
   std::string model_info();
+
+  const Eigen::VectorXd &initial_p() { return initial_p_; }
+  const Eigen::MatrixXd &transition_p() { return transition_p_; };
 
   // markov trace stream
   int next_state();
