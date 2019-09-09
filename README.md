@@ -8,9 +8,9 @@ All external libraries are header only, thus simplify the build process.
 ## 2. Build 
 ### 2.1 Prerequisites
 Only basic build tools are needed.
-CMake >= 3.3 \
-GCC >= 6.0 or Clang >= 3.6 (for C++17 support)
-make
+  * CMake >= 3.3 
+  * GCC >= 6.0 or Clang >= 3.6 (for C++17 support)
+  * make
 
 ### 2.2 Build
 ```shell
