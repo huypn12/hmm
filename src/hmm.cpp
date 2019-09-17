@@ -57,10 +57,12 @@ Eigen::MatrixXd hmm::forward(const std::vector<int> &observation) {
   auto alpha = Eigen::MatrixXd(state_count_, T);
   // basis step
   alpha.col(0) = initial_p_.cwiseProduct(emission_p_.col(observation[0]));
+  alpha.col(0) = alpha.col(0) / alpha.col(0).sum();
   // inductive step
   for (int t = 1; t < T; t++) {
-    auto O_t = emission_p_.col(observation[t]).asDiagonal().toDenseMatrix();
-    alpha.col(t)= alpha.col(t - 1).transpose() * transition_p_ * O_t;
+    alpha.col(t) = alpha.col(t - 1).transpose() * transition_p_;
+    alpha.col(t) = alpha.col(t).cwiseProduct(emission_p_.col(observation[t]));
+    alpha.col(t) = alpha.col(t) / alpha.col(t).sum();
   }
   return alpha;
 }
@@ -69,11 +71,15 @@ Eigen::MatrixXd hmm::backward(const std::vector<int> &observation) {
   auto T = observation.size();
   auto beta = Eigen::MatrixXd(state_count_, T);
   // basis step
-  beta.col(T - 1) = Eigen::VectorXd(state_count_).setOnes();
+  beta.col(T - 1) =
+      Eigen::VectorXd(state_count_)
+          .setConstant(1 / emission_p_.col(observation[T - 1]).sum());
   // inductive step
   for (int t = T - 2; t >= 0; t--) {
-    auto O_t = emission_p_.col(observation[t]).asDiagonal().toDenseMatrix();
-    beta.col(t) = transition_p_ * O_t * beta.col(t + 1);
+    beta.col(t) = beta.col(t + 1).cwiseProduct(emission_p_.col(observation[t + 1]));
+    beta.col(t) = (transition_p_ * beta.col(t)).transpose();
+    auto sum = beta.col(t).cwiseProduct(emission_p_.col(observation[t])).sum();
+    beta.col(t) = beta.col(t) / sum;
   }
   return beta;
 }
@@ -91,6 +97,7 @@ Eigen::MatrixXd hmm::posterior(const std::vector<int> &observation,
   auto gamma = Eigen::MatrixXd(state_count_, T);
   for (int t = 0; t < T; t++) {
     gamma.col(t) = alpha.col(t).cwiseProduct(beta.col(t));
+    auto sum = gamma.col(t).sum();
     gamma.col(t) = gamma.col(t) / gamma.col(t).sum();
   }
   return gamma;
@@ -108,10 +115,11 @@ void hmm::expectation(const std::vector<int> &observation,
     xi = xi.array().colwise() * alpha.col(t).array();
     xi = xi.array().colwise() * emission_p_.col(observation[t + 1]).array();
     xi = xi.array().rowwise() * beta.col(t + 1).transpose().array();
-    xi = xi / alpha.col(t).cwiseProduct(beta.col(t)).sum();
+    xi = xi / xi.sum();
     sigma_xi += xi;
   }
-  log_likelihood_ = log(alpha.col(T - 1).sum());
+  //TODO: asssert log likelihood is the same among all columns
+  log_likelihood_ = log(alpha.col(T - 2).cwiseProduct(beta.col(T - 2)).sum());
   auto param_count = state_count_ * state_count_ +
                      state_count_ * alphabet_count_ + state_count_;
   aic_ = -2 * log_likelihood_ + 2 * param_count;
@@ -122,9 +130,9 @@ double hmm::maximization(const std::vector<int> &observation,
                          const Eigen::MatrixXd &sigma_xi) {
   auto T = observation.size();
 
-  Eigen::VectorXd new_initial = gamma.col(0);
+  Eigen::VectorXd new_initial = gamma.rowwise().sum() / observation.size();
   Eigen::MatrixXd new_transition =
-      sigma_xi.array().colwise() / sigma_xi.rowwise().sum().array();
+      sigma_xi.array().colwise() / gamma.rowwise().sum().array();
   Eigen::MatrixXd new_emission =
       Eigen::MatrixXd::Zero(state_count_, alphabet_count_);
   for (int t = 0; t < T; t++) {
@@ -153,8 +161,9 @@ void hmm::fit(const std::vector<int> &observation, const int max_iters,
     Eigen::MatrixXd gamma(state_count_, T);
     Eigen::MatrixXd sigma_xi(state_count_, state_count_);
     expectation(observation, gamma, sigma_xi);
-    auto diff = maximization(observation, gamma, sigma_xi);
-    if (diff <= eps) {
+    auto norm_diff = maximization(observation, gamma, sigma_xi);
+    //TODO: assert log likelihood increases
+    if (norm_diff <= eps) {
       break;
     }
   }
