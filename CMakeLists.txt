@@ -1,38 +1,28 @@
 cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 17)
 
-include(PrecompiledHeader.cmake)
-
 project(hmm)
 
-# Dependencies check
-include_directories(external/eigen)
-include_directories(external/catch2/single_include)
+# Load CMake modules
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/CMake)
+include(cotire)
+
+find_package(Eigen3 REQUIRED NO_MODULE)
 
 # Build static lib
 include_directories(include)
 set(SOURCES
-  src/pchheader.cpp
   src/mc_random.cpp
   src/dtmc.cpp
   src/hmm.cpp
 )
 add_library(hmm ${SOURCES})
-add_precompiled_header(hmm include/pchheader.hpp FORCEINCLUDE)
+target_link_libraries(hmm Eigen3::Eigen)
+cotire(hmm)
 
-# Unit test
-add_executable(test_mc_random test/test_mc_random.cpp)
-target_link_libraries(test_mc_random hmm)
-
-add_executable(test_dtmc test/test_dtmc.cpp)
-target_link_libraries(test_dtmc hmm)
-
+# Unittest
+enable_testing()
 add_executable(test_hmm test/test_hmm.cpp)
 target_link_libraries(test_hmm hmm)
+add_test(NAME hmm COMMAND test_hmm)
 
-ENABLE_TESTING()
-add_test(hmm test_mc_random test_dtmc test_hmm)
-
-# Experiment
-add_executable(reduction experiment/reduction.cpp)
-target_link_libraries(reduction hmm)
