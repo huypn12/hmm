@@ -3,7 +3,6 @@
 
 #include "markov.hpp"
 #include "mc_random.hpp"
-#include "pchheader.hpp"
 
 namespace org::mcss {
 class dtmc {
