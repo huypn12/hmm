@@ -10,7 +10,7 @@ function gen_cmake_command {
     cmake_cmd="cmake -H. -GNinja"
     cmake_cmd="$cmake_cmd -Bbuild/$1"
     cmake_cmd="$cmake_cmd -DCMAKE_BUILD_TYPE=$1"
-    cmake_cmd="$cmake_cmd -DCMAKE_MODULE_PATH=$2"
+    cmake_cmd="$cmake_cmd -DCMAKE_PREFIX_PATH=$2"
     cmake_cmd="$cmake_cmd -DCMAKE_EXPORT_COMPILE_COMMANDS=Yes"
 }
 
@@ -47,4 +47,5 @@ eval "$cmake_cmd"
 link_compile_command "$build_type"
 echo "Generated compile command:"
 cat compile_commands.json
+echo ""
 echo "Done."
