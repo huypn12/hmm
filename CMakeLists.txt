@@ -22,6 +22,7 @@ cotire(hmm)
 
 # Unittest
 enable_testing()
+include_directories(third_party/catch2)
 add_executable(test_hmm test/test_hmm.cpp)
 target_link_libraries(test_hmm hmm)
 add_test(NAME hmm COMMAND test_hmm)
