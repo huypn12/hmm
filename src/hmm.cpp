@@ -1,22 +1,17 @@
 #include "hmm.hpp"
-#include "mc_random.hpp"
 
 using namespace org::mcss;
 
 hmm::hmm(const int &states_size, const int &alphabet_count)
-    : dtmc(states_size),
-      alphabet_count_(alphabet_count),
-      emission_p_{} {
+    : dtmc(states_size), alphabet_count_(alphabet_count), emission_p_{} {
   emission_p_ = Eigen::MatrixXd::Zero(states_size, alphabet_count);
 }
 
 hmm::hmm(const int &state_count, const int &alphabet_count,
-         const Eigen::VectorXd &initial_p,
-         const Eigen::MatrixXd &transition_p,
+         const Eigen::VectorXd &initial_p, const Eigen::MatrixXd &transition_p,
          const Eigen::MatrixXd &emission_p)
-  : dtmc(state_count, initial_p, transition_p),
-    alphabet_count_(alphabet_count),
-    emission_p_{} {
+    : dtmc(state_count, initial_p, transition_p),
+      alphabet_count_(alphabet_count), emission_p_{} {
   emission_p_ = emission_p;
 }
 
@@ -76,7 +71,8 @@ Eigen::MatrixXd hmm::backward(const std::vector<int> &observation) {
           .setConstant(1 / emission_p_.col(observation[T - 1]).sum());
   // inductive step
   for (int t = T - 2; t >= 0; t--) {
-    beta.col(t) = beta.col(t + 1).cwiseProduct(emission_p_.col(observation[t + 1]));
+    beta.col(t) =
+        beta.col(t + 1).cwiseProduct(emission_p_.col(observation[t + 1]));
     beta.col(t) = (transition_p_ * beta.col(t)).transpose();
     auto sum = beta.col(t).cwiseProduct(emission_p_.col(observation[t])).sum();
     beta.col(t) = beta.col(t) / sum;
@@ -118,7 +114,7 @@ void hmm::expectation(const std::vector<int> &observation,
     xi = xi / xi.sum();
     sigma_xi += xi;
   }
-  //TODO: asssert log likelihood is the same among all columns
+  // TODO: asssert log likelihood is the same among all columns
   log_likelihood_ = log(alpha.col(T - 2).cwiseProduct(beta.col(T - 2)).sum());
   auto param_count = state_count_ * state_count_ +
                      state_count_ * alphabet_count_ + state_count_;
@@ -146,7 +142,6 @@ double hmm::maximization(const std::vector<int> &observation,
   norm_diff += (new_transition - transition_p_).norm();
   norm_diff += (new_emission - emission_p_).norm();
 
-
   initial_p_ = new_initial;
   transition_p_ = new_transition;
   emission_p_ = new_emission;
@@ -162,7 +157,7 @@ void hmm::fit(const std::vector<int> &observation, const int max_iters,
     Eigen::MatrixXd sigma_xi(state_count_, state_count_);
     expectation(observation, gamma, sigma_xi);
     auto norm_diff = maximization(observation, gamma, sigma_xi);
-    //TODO: assert log likelihood increases
+    // TODO: assert log likelihood increases
     if (norm_diff <= eps) {
       break;
     }
@@ -174,4 +169,3 @@ std::vector<int> decode(const std::vector<int> &observation) {
   // TODO: implement viterbi algorithm
   return observation;
 }
-
