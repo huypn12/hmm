@@ -1,7 +1,8 @@
 #define CATCH_CONFIG_MAIN
-#include <catch2/catch.hpp>
 
 #include "hmm.hpp"
+
+#include <catch.hpp>
 
 #include <memory>
 
@@ -28,15 +29,17 @@ TEST_CASE("Simple trace simulation", "") {
   REQUIRE(ss.str().compare("0101010101") == 0);
 }
 
+
 TEST_CASE("Posterior marginals, Forward-Backward", "") {
   int n_state = 2;
-  int n_alphabet = 2;
+  int n_alphabet = 3;
 
   auto init = Eigen::VectorXd(n_state);
+  init << 1.0, 0.0;
+
   auto trans = Eigen::MatrixXd(n_state, n_state);
   auto emit = Eigen::MatrixXd(n_state, n_alphabet);
 
-  init << 0.5, 0.5;
   trans << 0.7, 0.3, 0.3, 0.7;
   emit << 0.9, 0.1, 0.2, 0.8;
 
@@ -96,37 +99,4 @@ TEST_CASE("Posterior marginals, Forward-Backward", "") {
     REQUIRE(posterior_marginals.rows() == expected.rows());
     REQUIRE(posterior_marginals.isApprox(expected, 0.0001));
   }
-}
-
-TEST_CASE("Parameter estimation, Baum-Welch", "") {
-  int n_state = 2;
-  int n_alphabet = 2;
-
-  auto init = Eigen::VectorXd(n_state);
-  auto trans = Eigen::MatrixXd(n_state, n_state);
-  auto emit = Eigen::MatrixXd(n_state, n_alphabet);
-  init << 0.5, 0.5;
-  trans << 0.95, 0.5, 0.3, 0.7;
-  emit << 0.3, 0.7, 0.8, 0.2;
-
-  auto hmm =
-      std::make_unique<org::mcss::hmm>(n_state, n_alphabet, init, trans, emit);
-
-  auto new_init = Eigen::VectorXd(n_state);
-  auto new_trans = Eigen::MatrixXd(n_state, n_state);
-  auto new_emit = Eigen::MatrixXd(n_state, n_alphabet);
-
-  std::vector<int> observation({0, 0, 1, 0, 0});
-
-  hmm->fit(observation, 1, 1e-6 );
-
-  new_init << 0.2, 0.8;
-  new_trans << 0.5, 0.5, 0.3, 0.7 ;
-  new_emit << 0.3, 0.7, 0.8, 0.2;;
-
-  INFO(hmm->model_info());
-
-  REQUIRE(hmm->initial_p().isApprox(new_init, 0.0001));
-  REQUIRE(hmm->transition_p().isApprox(new_trans, 0.0001));
-  REQUIRE(hmm->emission_p().isApprox(new_emit, 0.0001));
 }
