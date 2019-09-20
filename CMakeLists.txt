@@ -10,20 +10,21 @@ include(cotire)
 find_package(Eigen3 REQUIRED NO_MODULE)
 
 # Build static lib
-include_directories(include)
 set(SOURCES
   src/mc_random.cpp
   src/dtmc.cpp
   src/hmm.cpp
 )
 add_library(hmm ${SOURCES})
+target_include_directories(hmm PRIVATE include)
 target_link_libraries(hmm Eigen3::Eigen)
 cotire(hmm)
 
 # Unittest
-enable_testing()
-include_directories(third_party/catch2)
 add_executable(test_hmm test/test_hmm.cpp)
+target_include_directories(test_hmm SYSTEM PRIVATE include third_party/catch2)
 target_link_libraries(test_hmm hmm)
+cotire(test_hmm)
+enable_testing()
 add_test(NAME hmm COMMAND test_hmm)
 
