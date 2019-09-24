@@ -1,9 +1,10 @@
-#include "pchheader.hpp"
-
 #include "hmm.hpp"
 
+#include <iostream> 
 #include <fstream>
 #include <iterator>
+#include <memory>
+#include <unordered_map>
 
 using namespace org::mcss;
 
