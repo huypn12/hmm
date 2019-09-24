@@ -1,13 +1,15 @@
 #ifndef __MARKOV_HPP__
 #define __MARKOV_HPP__
 
-namespace mcss {
-  class markov {
-    public:
-      virtual int next_state();
-      virtual int get_current_state();
-      virtual int get_previous_state();
-  };
-} // org::mcss
+namespace org::mcss {
+class markov {
+protected:
+  static const int begin_state_ = -1;
+public:
+  virtual int next() = 0;
+  virtual const int &current_state() = 0;
+  virtual const int &previous_state() = 0;
+};
+} // namespace mcss
 
 #endif

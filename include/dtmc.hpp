@@ -5,31 +5,32 @@
 #include "mc_random.hpp"
 
 namespace org::mcss {
-class dtmc {
+class dtmc : public markov {
 protected:
   mc_random mc_random_;
 
-  int current_state_ = -1;
-  int previous_state_ = -1;
   int state_count_;
+  int current_state_ = begin_state_;
+  int previous_state_ = begin_state_;
+
   Eigen::VectorXd initial_p_;
   Eigen::MatrixXd transition_p_;
 
-  int transition();
+  int jump();
 
 public:
   dtmc(int state_count);
   dtmc(int state_count, const Eigen::VectorXd &initial_p,
        const Eigen::MatrixXd &transition_p);
-  std::string model_info();
+  std::string str();
 
   const Eigen::VectorXd &initial_p() { return initial_p_; }
   const Eigen::MatrixXd &transition_p() { return transition_p_; };
+  const int &current_state() override { return current_state_; };
+  const int &previous_state() override { return previous_state_; };
 
   // markov trace stream
-  int next_state();
-  int get_current_state();
-  int get_previous_state();
+  int next() override;
 };
 
 } // namespace org::mcss

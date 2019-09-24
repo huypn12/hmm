@@ -15,28 +15,26 @@ dtmc::dtmc(int state_count)
   transition_p_ = Eigen::MatrixXd::Zero(state_count, state_count);
 }
 
-int dtmc::transition() {
-  if (current_state_ == -1) {
+int dtmc::jump() {
+  if (current_state_ == begin_state_) {
     return mc_random_.choose_dirichlet(initial_p_);
   }
   auto pij = transition_p_.row(current_state_);
   return mc_random_.choose_dirichlet(pij);
 }
 
-int dtmc::next_state() {
-  auto next_state = transition();
+int dtmc::next() {
+  auto next_state = jump();
   previous_state_ = current_state_;
   current_state_ = next_state;
   return current_state_;
 }
 
-std::string dtmc::model_info() {
+std::string dtmc::str() {
   std::stringstream ss;
-
   ss << "Initial distribution: \n"
      << initial_p_ << std::endl
      << "Transition matrix: \n"
      << transition_p_ << std::endl;
-
   return ss.str();
 }
