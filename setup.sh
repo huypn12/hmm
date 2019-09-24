@@ -10,7 +10,9 @@ function gen_cmake_command {
     cmake_cmd="cmake -H. -GNinja"
     cmake_cmd="$cmake_cmd -Bbuild/$1"
     cmake_cmd="$cmake_cmd -DCMAKE_BUILD_TYPE=$1"
-    cmake_cmd="$cmake_cmd -DCMAKE_PREFIX_PATH=$2"
+    if [ ! -z "$2" ]; then
+        cmake_cmd="$cmake_cmd -DCMAKE_PREFIX_PATH=$2"
+    fi
     cmake_cmd="$cmake_cmd -DCMAKE_EXPORT_COMPILE_COMMANDS=Yes"
 }
 
@@ -19,6 +21,13 @@ function link_compile_command {
     ln -s "$compile_commands_file"
 }
 
+function gen_ccls {
+    ccls="%compile_commands.json \n"
+    ccls="%cpp %hpp -std=gnu++17 -stdlib=libstdc++ \n"
+    for i in "${@}"; do
+        modules_path="$ccls -I"
+    done
+}
 
 function get_opts {
     if [ "$1" = "debug" ]; then
@@ -40,10 +49,13 @@ echo "CMake libraries search path: $modules_path"
 
 clean "$build_type"
 echo "Project cleaned."
+
+echo "Generating CMake command"
 gen_cmake_command "$build_type" "$modules_path"
-echo "Generated CMake command: $cmake_cmd"
+echo "CMake command: $cmake_cmd"
 echo "Generating CMake build directory..."
 eval "$cmake_cmd"
+echo "Generating .ccls project config"
 link_compile_command "$build_type"
 echo "Generated compile command:"
 cat compile_commands.json
