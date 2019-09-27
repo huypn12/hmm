@@ -11,9 +11,9 @@ find_package(Eigen3 REQUIRED NO_MODULE)
 
 # Build static lib
 set(SOURCES
-  src/mc_random.cpp
-  src/dtmc.cpp
-  src/hmm.cpp
+  src/markov_random.cc
+  src/dtmc.cc
+  src/hmm.cc
 )
 add_library(hmm ${SOURCES})
 target_include_directories(hmm PRIVATE include)
