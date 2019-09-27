@@ -1,8 +1,8 @@
-#include "hmm.hpp"
+#include "hmm.h"
+#include <cmath>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <cmath>
 
 using namespace org::mcss;
 
@@ -24,13 +24,13 @@ std::string Hmm::Str() {
   ss << dtmc_.Str() << std::endl;
   ss << "Observation cardinality: " << alphabet_count_ << std::endl;
   ss << "Emission probabilities: \n" << emission_p_ << std::endl;
-    return ss.str();
+  return ss.str();
 }
 
 // Simulate trace
-int Hmm::next() {
+int Hmm::Next() {
   int state = dtmc_.Next();
-  int observation = random_.ChooseDirichlet(emission_p_.row(state));
+  int observation = rand_.ChooseDirichlet(emission_p_.row(state));
   return observation;
 }
 
@@ -40,7 +40,8 @@ void Hmm::Forward(const std::vector<int> &observation) {
   alpha_.resize(state_count, T);
   alpha_.setZero();
   // basis step
-  alpha_.col(0) = dtmc_.initial_p().cwiseProduct(emission_p_.col(observation[0]));
+  alpha_.col(0) =
+      dtmc_.initial_p().cwiseProduct(emission_p_.col(observation[0]));
   alpha_.col(0) = alpha_.col(0) / alpha_.col(0).sum();
   // inductive step
   for (int t = 1; t < T; t++) {
@@ -56,8 +57,7 @@ void Hmm::Backward(const std::vector<int> &observation) {
   beta_.resize(state_count, T);
   beta_.setZero();
   // basis step
-  beta_.col(T - 1) =
-      Eigen::VectorXd(state_count).setConstant(1 / state_count);
+  beta_.col(T - 1) = Eigen::VectorXd(state_count).setConstant(1 / state_count);
   // inductive step
   for (int t = T - 2; t >= 0; t--) {
     beta_.col(t) =
@@ -83,7 +83,8 @@ const Eigen::MatrixXd &Hmm::Posterior(const std::vector<int> &observation) {
 
 void Hmm::InitRandom() {
   dtmc_.InitRandom();
-  emission_p_ = random_.RandomStochasticMatrix(dtmc_.state_count(), alphabet_count_);
+  emission_p_ =
+      rand_.RandomStochasticMatrix(dtmc_.state_count(), alphabet_count_);
 }
 
 void Hmm::Expectation(const std::vector<int> &observation) {
@@ -102,14 +103,14 @@ void Hmm::Expectation(const std::vector<int> &observation) {
     sigma_xi_ += xi;
   }
   log_likelihood_ = log(alpha_.col(T).sum());
-  auto param_count = state_count * state_count +
-                     state_count * alphabet_count_ + state_count;
+  auto param_count =
+      state_count * state_count + state_count * alphabet_count_ + state_count;
   aic_ = -2 * log_likelihood_ + 2 * param_count;
 }
 
-double Hmm::UpdateParams(const Eigen::VectorXd &new_initial, const Eigen::MatrixXd &new_transition,
-                    const Eigen::MatrixXd &new_emission)
-{
+double Hmm::UpdateParams(const Eigen::VectorXd &new_initial,
+                         const Eigen::MatrixXd &new_transition,
+                         const Eigen::MatrixXd &new_emission) {
   auto norm_diff = 0.0;
   norm_diff += (new_initial - dtmc_.initial_p()).norm();
   norm_diff += (new_transition - dtmc_.transition_p()).norm();
@@ -135,7 +136,8 @@ double Hmm::Maximization(const std::vector<int> &observation) {
     auto o = observation[t];
     new_emission.col(o) += gamma_.col(t);
   }
-  new_emission = new_emission.array().colwise() / gamma_.rowwise().sum().array();
+  new_emission =
+      new_emission.array().colwise() / gamma_.rowwise().sum().array();
 
   auto norm_diff = UpdateParams(new_initial, new_transition, new_emission);
   return norm_diff;

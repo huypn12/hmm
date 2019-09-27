@@ -1,4 +1,4 @@
-#include "dtmc.hpp"
+#include "dtmc.h"
 #include <string>
 #include <sstream>
 
@@ -18,16 +18,16 @@ Dtmc::Dtmc(int state_count)
 }
 
 void Dtmc::InitRandom() {
-  initial_p_ = random_.RandomStochasticVector(state_count_);
-  transition_p_ = random_.RandomStochasticMatrix(state_count_, state_count_);
+  initial_p_ = rand_.RandomStochasticVector(state_count_);
+  transition_p_ = rand_.RandomStochasticMatrix(state_count_, state_count_);
 }
 
 int Dtmc::Jump() {
   if (current_state_ == kBeginState) {
-    return random_.ChooseDirichlet(initial_p_);
+    return rand_.ChooseDirichlet(initial_p_);
   }
   auto pij = transition_p_.row(current_state_);
-  return random_.ChooseDirichlet(pij);
+  return rand_.ChooseDirichlet(pij);
 }
 
 int Dtmc::Next() {

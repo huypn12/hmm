@@ -1,10 +1,11 @@
 #define CATCH_CONFIG_MAIN
 
-#include "hmm.hpp"
+#include "hmm.h"
 
 #include <catch.hpp>
 
 #include <memory>
+#include <sstream>
 
 using namespace org::mcss;
 
@@ -21,11 +22,11 @@ TEST_CASE("Simple trace simulation", "") {
   emit << 1, 0, 0, 1;
 
   auto hmm =
-      std::make_unique<org::mcss::hmm>(n_state, n_alphabet, init, trans, emit);
+      std::make_unique<Hmm>(n_state, n_alphabet, init, trans, emit);
 
   std::stringstream ss;
   for (int i = 0; i < 10; i++) {
-    ss << hmm->next();
+    ss << hmm->Next();
   }
 
   REQUIRE(ss.str().compare("0101010101") == 0);
@@ -41,7 +42,7 @@ TEST_CASE("Posterior marginals, Forward-Backward", "") {
   trans.setConstant(1.0 / 2);
   auto emit = Eigen::MatrixXd(n_state, n_alphabet);
   emit.setConstant(1.0 / 3);
-  auto model = std::make_unique<hmm>(n_state, n_alphabet, init, trans, emit);
+  auto model = std::make_unique<Hmm>(n_state, n_alphabet, init, trans, emit);
 
   SECTION("Forward Procedure", "") {}
 

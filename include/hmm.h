@@ -8,7 +8,7 @@
 namespace org::mcss {
 class Hmm {
 private:
-  MarkovRandom random_;
+  MarkovRandom rand_;
 
   Dtmc dtmc_;
   int alphabet_count_;
