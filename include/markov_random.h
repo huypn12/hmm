@@ -1,5 +1,5 @@
-#ifndef __MC_RANDOM_HPP__
-#define __MC_RANDOM_HPP__
+#ifndef __MARKOV_RANDOM_H__
+#define __MARKOV_RANDOM_H__
 
 #include <Eigen/Eigen>
 
@@ -7,30 +7,27 @@
 #include <vector>
 
 namespace org::mcss {
-class mc_random {
+class MarkovRandom {
 private:
   int seed_;
   std::mt19937_64 generator_;
 
-protected:
-  void init(int seed);
-
 public:
-  mc_random();
-  mc_random(int seed);
+  MarkovRandom();
+  MarkovRandom(int seed);
 
   void reset();
 
-  int choose_uniform(const int &n_states);
-  int choose_dirichlet(const std::vector<double> &distribution);
-  int choose_dirichlet(const Eigen::VectorXd &distribution);
+  int ChooseUniform(const int &n_states);
+  int ChooseDirichlet(const std::vector<double> &distribution);
+  int ChooseDirichlet(const Eigen::VectorXd &distribution);
 
-  double uniform_p();
+  double RandomProbUniform();
 
-  Eigen::MatrixXd random_matrix(const int &row, const int &col);
-  Eigen::VectorXd random_vector(const int &dim);
+  Eigen::MatrixXd RandomStochasticMatrix(const int &row, const int &col);
+  Eigen::VectorXd RandomStochasticVector(const int &dim);
 };
 
 } // namespace org::mcss
 
-#endif 
+#endif // __MARKOV_RANDOM_H__

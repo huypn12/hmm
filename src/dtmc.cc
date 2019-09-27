@@ -1,36 +1,43 @@
 #include "dtmc.hpp"
+#include <string>
+#include <sstream>
 
 using namespace org::mcss;
 
-dtmc::dtmc(int state_count, const Eigen::VectorXd &initial_p,
+Dtmc::Dtmc(int state_count, const Eigen::VectorXd &initial_p,
            const Eigen::MatrixXd &transition_p)
     : state_count_(state_count), initial_p_{}, transition_p_{} {
   initial_p_ = initial_p;
   transition_p_ = transition_p;
 }
 
-dtmc::dtmc(int state_count)
+Dtmc::Dtmc(int state_count)
     : state_count_(state_count), initial_p_{}, transition_p_{} {
   initial_p_ = Eigen::VectorXd::Zero(state_count);
   transition_p_ = Eigen::MatrixXd::Zero(state_count, state_count);
 }
 
-int dtmc::jump() {
-  if (current_state_ == begin_state_) {
-    return mc_random_.choose_dirichlet(initial_p_);
-  }
-  auto pij = transition_p_.row(current_state_);
-  return mc_random_.choose_dirichlet(pij);
+void Dtmc::InitRandom() {
+  initial_p_ = random_.RandomStochasticVector(state_count_);
+  transition_p_ = random_.RandomStochasticMatrix(state_count_, state_count_);
 }
 
-int dtmc::next() {
-  auto next_state = jump();
+int Dtmc::Jump() {
+  if (current_state_ == kBeginState) {
+    return random_.ChooseDirichlet(initial_p_);
+  }
+  auto pij = transition_p_.row(current_state_);
+  return random_.ChooseDirichlet(pij);
+}
+
+int Dtmc::Next() {
+  auto next_state = Jump();
   previous_state_ = current_state_;
   current_state_ = next_state;
   return current_state_;
 }
 
-std::string dtmc::str() {
+std::string Dtmc::Str() {
   std::stringstream ss;
   ss << "Initial distribution: \n"
      << initial_p_ << std::endl

@@ -1,67 +1,64 @@
 #include "mc_random.hpp"
+#include <vector>
 
 
 using namespace org::mcss;
 
-void mc_random::init(int seed)
-{
-  seed_ = seed;
-  reset();
-}
-
-void mc_random::reset()
+void McRandom::reset()
 {
   generator_ = std::mt19937_64(seed_);
 }
 
-mc_random::mc_random(int seed)
+McRandom::McRandom(int seed)
+  : seed_(seed),
+    generator_(std::mt19937_64(seed))
 {
-  init(seed);
 }
 
-mc_random::mc_random() {
+McRandom::McRandom() {
   std::random_device rd;
-  generator_ = std::mt19937_64(rd());
+  seed_ = rd();
+  generator_ = std::mt19937_64(seed_);
 }
 
-int mc_random::choose_uniform(const int &n_states)
+int McRandom::ChooseUniform(const int &n_states)
 {
   std::uniform_int_distribution<int> distribution(0, n_states - 1);
   return distribution(generator_);
 }
 
-int mc_random::choose_dirichlet(const std::vector<double> &p) {
+int McRandom::ChooseDirichlet(const std::vector<double> &p) {
   std::discrete_distribution<int> distribution(p.begin(), p.end());
   return distribution(generator_);
 }
 
-int mc_random::choose_dirichlet(const Eigen::VectorXd &p)
+int McRandom::ChooseDirichlet(const Eigen::VectorXd &p)
 {
   std::vector<double> v_dist;
   v_dist.resize(p.size());
   Eigen::VectorXd::Map(&v_dist[0], v_dist.size()) = p;
-  return choose_dirichlet(v_dist);
+  return ChooseDirichlet(v_dist);
 }
 
-double mc_random::uniform_p()
+double McRandom::RandomProbUniform()
 {
   std::uniform_real_distribution<double> distribution(0.0, 1.0);
   return distribution(generator_);
 }
 
-Eigen::VectorXd mc_random::random_vector(const int &dim) {
+Eigen::VectorXd McRandom::RandomStochasticVector(const int &dim) {
   auto v = Eigen::VectorXd(dim);
   for (int i = 0; i < v.size(); i++) {
-    v(i) = uniform_p();
+    v(i) = RandomProbUniform();
   }
   v = v / v.sum();
   return v;
 }
 
-Eigen::MatrixXd mc_random::random_matrix(const int &row, const int &col) {
+Eigen::MatrixXd McRandom::RandomStochasticMatrix(const int &row, const int &col) {
   auto matrix = Eigen::MatrixXd(row, col);
   for (int j = 0; j < matrix.rows(); j++) {
-    matrix.row(j) = random_vector(col);
+    matrix.row(j) = RandomStochasticVector(col);
   }
   return matrix;
 }
