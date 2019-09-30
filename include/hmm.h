@@ -1,7 +1,9 @@
-#ifndef __HMM_HPP__
-#define __HMM_HPP__
+#ifndef __HMM_H__
+#define __HMM_H__
 
 #include "dtmc.h"
+#include "label_trace.h"
+
 #include <string>
 #include <vector>
 
@@ -18,7 +20,7 @@ private:
   int previous_obs_;
 
   static const int kMaxIters = 1000;
-  static constexpr double kEps = 1e-9;
+  static constexpr double kEps = 1e-5;
   Eigen::MatrixXd alpha_;
   Eigen::MatrixXd beta_;
   Eigen::MatrixXd gamma_;
@@ -30,10 +32,10 @@ private:
 protected:
   double UpdateParams(const Eigen::VectorXd &, const Eigen::MatrixXd &,
                       const Eigen::MatrixXd &);
-  void Forward(const std::vector<int> &observation);
-  void Backward(const std::vector<int> &observation);
-  void Expectation(const std::vector<int> &observation);
-  double Maximization(const std::vector<int> &observation);
+  void Forward(const label_trace &observation);
+  void Backward(const label_trace &observation);
+  void Expectation(const label_trace &observation);
+  double Maximization(const label_trace &observation);
 
 public:
   Hmm(const int &states_size, const int &alphabet_count,
@@ -50,14 +52,14 @@ public:
   void InitRandom();
 
   // Likelihood estimation: forward-backward algorithm
-  const Eigen::MatrixXd &Posterior(const std::vector<int> &observation);
+  const Eigen::MatrixXd &Posterior(const label_trace &observation);
 
   // Parameter estimation: baum-welch
-  void Fit(const std::vector<int> &observation,
+  void Fit(const label_trace &observation,
            const int &max_iters = kMaxIters, const double &eps = kEps);
 
   // Observation explanation: viterbi
-  std::vector<int> Decode(const std::vector<int> &observation);
+  label_trace Decode(const label_trace &observation);
 
   // getter
   const int &alphabet_count() { return alphabet_count_; }
@@ -74,4 +76,4 @@ public:
 };
 } // namespace org::mcss
 
-#endif
+#endif // __HMM_H__

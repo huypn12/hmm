@@ -1,4 +1,5 @@
 #include "hmm.h"
+
 #include <cmath>
 #include <sstream>
 #include <string>
@@ -34,7 +35,7 @@ int Hmm::Next() {
   return observation;
 }
 
-void Hmm::Forward(const std::vector<int> &observation) {
+void Hmm::Forward(const label_trace &observation) {
   auto T = observation.size();
   auto state_count = dtmc_.state_count();
   alpha_.resize(state_count, T);
@@ -51,7 +52,7 @@ void Hmm::Forward(const std::vector<int> &observation) {
   }
 }
 
-void Hmm::Backward(const std::vector<int> &observation) {
+void Hmm::Backward(const label_trace &observation) {
   auto T = observation.size();
   auto state_count = dtmc_.state_count();
   beta_.resize(state_count, T);
@@ -68,7 +69,7 @@ void Hmm::Backward(const std::vector<int> &observation) {
   }
 }
 
-const Eigen::MatrixXd &Hmm::Posterior(const std::vector<int> &observation) {
+const Eigen::MatrixXd &Hmm::Posterior(const label_trace &observation) {
   auto T = observation.size();
   auto state_count = dtmc_.state_count();
   gamma_ = Eigen::MatrixXd(state_count, T);
@@ -87,7 +88,7 @@ void Hmm::InitRandom() {
       rand_.RandomStochasticMatrix(dtmc_.state_count(), alphabet_count_);
 }
 
-void Hmm::Expectation(const std::vector<int> &observation) {
+void Hmm::Expectation(const label_trace &observation) {
   auto T = observation.size();
   auto state_count = dtmc_.state_count();
 
@@ -123,7 +124,7 @@ double Hmm::UpdateParams(const Eigen::VectorXd &new_initial,
   return norm_diff;
 }
 
-double Hmm::Maximization(const std::vector<int> &observation) {
+double Hmm::Maximization(const label_trace &observation) {
   auto T = observation.size();
   auto state_count = dtmc_.state_count();
 
@@ -143,7 +144,7 @@ double Hmm::Maximization(const std::vector<int> &observation) {
   return norm_diff;
 }
 
-void Hmm::Fit(const std::vector<int> &observation, const int &max_iters,
+void Hmm::Fit(const label_trace &observation, const int &max_iters,
               const double &eps) {
   auto T = observation.size();
   for (int i = 0; i < max_iters; last_iter_ = ++i) {
