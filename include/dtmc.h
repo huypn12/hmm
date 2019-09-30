@@ -1,5 +1,5 @@
-#ifndef __DTMC_HPP__
-#define __DTMC_HPP__
+#ifndef __DTMC_H__
+#define __DTMC_H__
 
 #include "markov.h"
 #include "markov_random.h"
@@ -42,4 +42,4 @@ public:
 
 } // namespace org::mcss
 
-#endif
+#endif // __DTMC_H__

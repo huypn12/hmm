@@ -1,5 +1,5 @@
-#ifndef __MARKOV_HPP__
-#define __MARKOV_HPP__
+#ifndef __MARKOV_H__
+#define __MARKOV_H__
 
 namespace org::mcss {
 class Markov {
@@ -10,6 +10,6 @@ public:
   virtual const int &current_state() = 0;
   virtual const int &previous_state() = 0;
 };
-} // namespace mcss
+} // namespace org::mcss
 
-#endif
+#endif // __MARKOV_H__
