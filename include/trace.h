@@ -1,19 +1,19 @@
-#ifndef __TRACE_HPP__
-#define __TRACE_HPP__
+#ifndef __TRACE_H__
+#define __TRACE_H__
 
+#include <fstream>
 #include <string>
 
+namespace org::mcss {
 class trace {
 public:
-  virtual int &operator[](const int &i);
 
-  virtual void from(const std::string &);
-  virtual std::string str();
-  virtual void from_file(const std::string &);
-  virtual void to_file(const std::string &);
+  virtual void FromStr(const std::string &) = 0;
+  virtual void FromFile(std::ifstream &) = 0;
+  virtual std::string ToStr() = 0;
+  virtual void ToFile(std::ofstream &) = 0;
 
-  virtual void append();
-  virtual void flush();
+  virtual void Flush() = 0;
 };
-
+} // namespace org::mcss
 #endif
