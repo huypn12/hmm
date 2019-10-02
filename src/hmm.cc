@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <sstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -58,7 +59,7 @@ void Hmm::Backward(const label_trace &observation) {
   beta_.resize(state_count, T);
   beta_.setZero();
   // basis step
-  beta_.col(T - 1) = Eigen::VectorXd(state_count).setConstant(1 / state_count);
+  beta_.col(T - 1).setConstant(1 / emission_p_.col(observation[T - 1]).sum());
   // inductive step
   for (int t = T - 2; t >= 0; t--) {
     beta_.col(t) =
@@ -103,10 +104,6 @@ void Hmm::Expectation(const label_trace &observation) {
     xi = xi / xi.sum();
     sigma_xi_ += xi;
   }
-  log_likelihood_ = log(alpha_.col(T).sum());
-  auto param_count =
-      state_count * state_count + state_count * alphabet_count_ + state_count;
-  aic_ = -2 * log_likelihood_ + 2 * param_count;
 }
 
 double Hmm::UpdateParams(const Eigen::VectorXd &new_initial,
@@ -122,6 +119,31 @@ double Hmm::UpdateParams(const Eigen::VectorXd &new_initial,
   emission_p_ = new_emission;
 
   return norm_diff;
+}
+
+void Hmm::Evaluate(const label_trace &observation)
+{
+  auto T = observation.size();
+  auto state_count = dtmc_.state_count();
+  alpha_.resize(state_count, T);
+  alpha_.setZero();
+  // basis step
+  alpha_.col(0) =
+      dtmc_.initial_p().cwiseProduct(emission_p_.col(observation[0]));
+  alpha_.col(0) = alpha_.col(0) / alpha_.col(0).sum();
+  // inductive step
+  for (int t = 1; t < T; t++) {
+    alpha_.col(t) = alpha_.col(t - 1).transpose() * dtmc_.transition_p();
+    alpha_.col(t) = alpha_.col(t).cwiseProduct(emission_p_.col(observation[t]));
+    if (t == T - 1) {
+      break;
+    }
+    alpha_.col(t) = alpha_.col(t) / alpha_.col(t).sum();
+  }
+  log_likelihood_ = log(alpha_.col(T - 1).sum());
+  auto param_count =
+      state_count * state_count + state_count * alphabet_count_ + state_count;
+  aic_ = -2 * log_likelihood_ + 2 * param_count;
 }
 
 double Hmm::Maximization(const label_trace &observation) {
@@ -149,7 +171,9 @@ void Hmm::Fit(const label_trace &observation, const int &max_iters,
   auto T = observation.size();
   for (int i = 0; i < max_iters; last_iter_ = ++i) {
     Expectation(observation);
-    if (Maximization(observation) <= eps) {
+    auto norm_diff = Maximization(observation);
+    Evaluate(observation);
+    if (norm_diff <= eps) {
       break;
     }
   }

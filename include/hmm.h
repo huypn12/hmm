@@ -36,6 +36,7 @@ protected:
   void Backward(const label_trace &observation);
   void Expectation(const label_trace &observation);
   double Maximization(const label_trace &observation);
+  void Evaluate(const label_trace &observation);
 
 public:
   Hmm(const int &states_size, const int &alphabet_count,
