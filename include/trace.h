@@ -9,9 +9,7 @@ class trace {
 public:
 
   virtual void FromStr(const std::string &) = 0;
-  virtual void FromFile(std::ifstream &) = 0;
   virtual std::string ToStr() = 0;
-  virtual void ToFile(std::ofstream &) = 0;
 
   virtual void Flush() = 0;
 };
