@@ -1,11 +1,15 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
+#include <chrono>
+#include <ctime>
+#include <iomanip>
+#include <string>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
-// Super simple & stupid incremental logger
+// Super simple & stupid buffered logger
 namespace org::mcss {
 class Logger {
 private:
@@ -13,19 +17,37 @@ private:
   std::stringstream log_buf_;
   std::ofstream log_fptr_;
 
+protected:
   long LogSize() {
-    log_buf_.seekp(0, std::ios::end);
-    std::stringstream::pos_type offset = log_buf_.tellp();
-    return long(offset);
+    log_buf_.seekg(0, std::ios::end);
+    int size = log_buf_.tellg();
+    log_buf_.seekg(0, std::ios::end);
+    return size;
+  }
+
+  void Log(const std::string &mesg) {
+    log_buf_ << Now() << " : " << mesg << std::endl;
+    auto log_size = LogSize();
+    if (log_size > 512) {
+      auto mesg = log_buf_.str();
+      log_fptr_ << mesg;
+      log_buf_.str(std::string());
+    }
+  }
+
+  std::string Now() {
+    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&now), "%F %T%z");
+    return ss.str();
   }
 
 public:
   Logger(const std::string &log_fpath) { SetLogFile(log_fpath); }
-
+  Logger() {};
   ~Logger() { Dump(); }
 
   void SetLogFile(const std::string &log_fpath) {
-    log_fptr_ = std::ofstream(log_fpath);
     log_fptr_.open(log_fpath, std::ios::out | std::ios::app);
     if (!log_fptr_.is_open()) {
       std::cerr << "[E] Unable to open log file, logging to stderr instead."
@@ -34,20 +56,11 @@ public:
     }
   }
 
-  void Log(const std::string &mesg) {
-    log_buf_ << mesg << std::endl;
-    auto log_size = LogSize();
-    if (LogSize() > 4096) {
-      log_fptr_ << log_buf_.str();
-      log_buf_.clear();
-    }
-  }
-
-  void LogInfo(const std::string &mesg) { Log("[INFO]" + mesg); }
+  void LogInfo(const std::string &mesg) { Log("[INFO] " + mesg); }
 
   void LogError(const std::string &mesg) { Log("[ERROR] " + mesg); }
 
-  void Dump() { log_fptr_ << log_buf_.str(); }
+  void Dump() { auto mesg = log_buf_.str(); log_fptr_ << mesg; }
 };
 } // namespace org::mcss
 
