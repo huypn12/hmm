@@ -9,7 +9,7 @@ include(cotire)
 
 find_package(Eigen3 REQUIRED NO_MODULE)
 
-# Build static lib
+# Static lib
 set(SOURCES
   src/markov_random.cc
   src/dtmc.cc
@@ -27,4 +27,17 @@ target_link_libraries(test_hmm hmm)
 cotire(test_hmm)
 enable_testing()
 add_test(NAME hmm COMMAND test_hmm)
+
+# Examples
+file(COPY examples/data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+add_executable(reduction examples/reduction.cc)
+target_include_directories(reduction PRIVATE include)
+target_link_libraries(reduction hmm)
+cotire(reduction)
+
+add_executable(simulation examples/simulation.cc)
+target_include_directories(simulation PRIVATE include)
+target_link_libraries(simulation hmm)
+cotire(reduction)
 
