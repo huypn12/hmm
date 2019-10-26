@@ -2,10 +2,7 @@
 #define __LOGGER_H__
 
 #include <chrono>
-#include <ctime>
-#include <iomanip>
 #include <string>
-#include <fstream>
 #include <iostream>
 #include <sstream>
 
@@ -31,7 +28,7 @@ protected:
     if (log_size > 512) {
       auto mesg = log_buf_.str();
       log_fptr_ << mesg;
-      log_buf_.str(std::string());
+      log_buf_.str(std::string()); // clear stream 
     }
   }
 

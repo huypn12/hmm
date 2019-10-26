@@ -30,22 +30,18 @@ void GenerateTrace(const std::string &fpath, const int &n_steps) {
   auto orig_dtmc = std::make_shared<Dtmc>(states_count, init_p, transition_p);
   std::cout << "Original DTMC parameters: \n" << orig_dtmc->Str() << std::endl;
 
-  // Generate state trace
-  auto trace_len = n_steps;
-  auto trace = std::vector<int>(trace_len);
-  std::generate(trace.begin(), trace.end(),
-                [&]() { return orig_dtmc->Next(); });
   // Map trace of state to label
   std::unordered_map<int, int> label;
   label.insert(std::pair<int, int>(0, 0));
   label.insert(std::pair<int, int>(1, 1));
-  label.insert(std::pair<int, int>(2, 2));
   // state 3 and 4 has the same label
+  label.insert(std::pair<int, int>(2, 2));
   label.insert(std::pair<int, int>(3, 2));
   // Make label trace
   label_trace rtrace;
-  for (auto &it : trace) {
-    rtrace.Append(label.at(it));
+  for (auto i = 0; i < n_steps; i++) {
+    auto s = orig_dtmc->Next();
+    rtrace.Append(label.at(s));
   }
   SaveTrace(fpath, 3, rtrace);
 }
