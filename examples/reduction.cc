@@ -1,11 +1,11 @@
-#include "hmm.h"
-#include "logger.h"
-
 #include <fstream>
 #include <iostream>
 #include <iterator>
 #include <memory>
 #include <unordered_map>
+
+#include "hmm.h"
+#include "logger.h"
 
 #define PANIC -1
 #define OK 0
@@ -46,7 +46,7 @@ int FitKStateModel(const int &state_count, const std::string &trace_file) {
   logger.LogInfo("+++ Hidden states: " + std::to_string(state_count));
   logger.LogInfo("Using data file to train: " + trace_file);
   logger.LogInfo("Label count: " + std::to_string(alphabet_count));
-  auto trace = label_trace(trace_str);
+  auto trace = LabelTrace(trace_str);
   logger.LogInfo("Trace: " + trace.ToStr().substr(0, 10) + "... of size " +
                  std::to_string(trace.size()));
 

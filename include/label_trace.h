@@ -1,21 +1,22 @@
 #ifndef __LABEL_TRACE_H__
 #define __LABEL_TRACE_H__
 
-#include "trace.h"
-
 #include <iterator>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include "trace.h"
+
 namespace org::mcss {
-class label_trace : public trace {
-private:
+class LabelTrace : public trace {
+ private:
   std::vector<int> container_;
 
-public:
-  label_trace() {}
-  label_trace(const std::string &str) { FromStr(str); }
+ public:
+  LabelTrace() {}
+  LabelTrace(const LabelTrace &t) { container_ = t.container_; }
+  LabelTrace(const std::string &str) { FromStr(str); }
 
   const int &operator[](const int &i) const { return container_[i]; }
   const std::vector<int> &container() { return container_; }
@@ -25,8 +26,7 @@ public:
     std::stringstream ss(str);
     for (int i; ss >> i;) {
       container_.push_back(i);
-      if (ss.peek() == ',')
-        ss.ignore();
+      if (ss.peek() == ',') ss.ignore();
     }
   }
   std::string ToStr() override {
@@ -42,6 +42,6 @@ public:
   void Flush() override { container_.clear(); }
   void Append(const int &e) { container_.push_back(e); }
 };
-} // namespace org::mcss
+}  // namespace org::mcss
 
-#endif // __LABEL_TRACE_H__
+#endif  // __LABEL_TRACE_H__

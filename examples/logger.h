@@ -4,6 +4,7 @@
 #include <chrono>
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 
 // Super simple & stupid buffered logger

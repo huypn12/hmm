@@ -36,7 +36,7 @@ int Hmm::Next() {
   return observation;
 }
 
-void Hmm::Forward(const label_trace &observation) {
+void Hmm::Forward(const LabelTrace &observation) {
   auto T = observation.size();
   auto state_count = dtmc_.state_count();
   alpha_.resize(state_count, T);
@@ -53,7 +53,7 @@ void Hmm::Forward(const label_trace &observation) {
   }
 }
 
-void Hmm::Backward(const label_trace &observation) {
+void Hmm::Backward(const LabelTrace &observation) {
   auto T = observation.size();
   auto state_count = dtmc_.state_count();
   beta_.resize(state_count, T);
@@ -70,7 +70,7 @@ void Hmm::Backward(const label_trace &observation) {
   }
 }
 
-const Eigen::MatrixXd &Hmm::Posterior(const label_trace &observation) {
+const Eigen::MatrixXd &Hmm::Posterior(const LabelTrace &observation) {
   auto T = observation.size();
   auto state_count = dtmc_.state_count();
   gamma_ = Eigen::MatrixXd(state_count, T);
@@ -89,7 +89,7 @@ void Hmm::InitRandom() {
       rand_.RandomStochasticMatrix(dtmc_.state_count(), alphabet_count_);
 }
 
-void Hmm::Expectation(const label_trace &observation) {
+void Hmm::Expectation(const LabelTrace &observation) {
   auto T = observation.size();
   auto state_count = dtmc_.state_count();
 
@@ -121,7 +121,7 @@ double Hmm::UpdateParams(const Eigen::VectorXd &new_initial,
   return norm_diff;
 }
 
-void Hmm::Evaluate(const label_trace &observation)
+void Hmm::Evaluate(const LabelTrace &observation)
 {
   auto T = observation.size();
   auto state_count = dtmc_.state_count();
@@ -146,7 +146,7 @@ void Hmm::Evaluate(const label_trace &observation)
   aic_ = -2 * log_likelihood_ + 2 * param_count;
 }
 
-double Hmm::Maximization(const label_trace &observation) {
+double Hmm::Maximization(const LabelTrace &observation) {
   auto T = observation.size();
   auto state_count = dtmc_.state_count();
 
@@ -166,7 +166,7 @@ double Hmm::Maximization(const label_trace &observation) {
   return norm_diff;
 }
 
-void Hmm::Fit(const label_trace &observation, const int &max_iters,
+void Hmm::Fit(const LabelTrace &observation, const int &max_iters,
               const double &eps) {
   auto T = observation.size();
   for (int i = 0; i < max_iters; last_iter_ = ++i) {

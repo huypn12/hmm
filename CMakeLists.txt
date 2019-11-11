@@ -14,6 +14,7 @@ set(SOURCES
   src/markov_random.cc
   src/dtmc.cc
   src/hmm.cc
+  src/labelled_dtmc.cc
 )
 add_library(hmm ${SOURCES})
 target_include_directories(hmm PRIVATE include)
@@ -41,3 +42,7 @@ target_include_directories(simulation PRIVATE include)
 target_link_libraries(simulation hmm)
 cotire(reduction)
 
+add_executable(apprx examples/apprx.cc)
+target_include_directories(apprx PRIVATE include)
+target_link_libraries(apprx hmm)
+cotire(reduction)

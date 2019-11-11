@@ -7,7 +7,7 @@
 
 using namespace org::mcss;
 
-void SaveTrace(const std::string &fpath, int alphabet_size, label_trace &trace) {
+void SaveTrace(const std::string &fpath, int alphabet_size, LabelTrace &trace) {
   std::ofstream ofs(fpath);
   if (ofs.good()) {
     ofs << alphabet_size << std::endl << trace.ToStr();
@@ -38,7 +38,7 @@ void GenerateTrace(const std::string &fpath, const int &n_steps) {
   label.insert(std::pair<int, int>(2, 2));
   label.insert(std::pair<int, int>(3, 2));
   // Make label trace
-  label_trace rtrace;
+  LabelTrace rtrace;
   for (auto i = 0; i < n_steps; i++) {
     auto s = orig_dtmc->Next();
     rtrace.Append(label.at(s));
