@@ -1,4 +1,5 @@
-#include "dtmc.h"
+#include "dtmc.hh"
+
 #include <string>
 #include <sstream>
 

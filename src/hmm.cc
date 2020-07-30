@@ -1,4 +1,4 @@
-#include "hmm.h"
+#include "hmm.hh"
 
 #include <cmath>
 #include <sstream>

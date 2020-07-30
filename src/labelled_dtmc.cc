@@ -1,4 +1,4 @@
-#include "labelled_dtmc.h"
+#include "labelled_dtmc.hh"
 
 using namespace org::mcss;
 
